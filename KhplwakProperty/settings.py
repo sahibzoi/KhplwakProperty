@@ -1,117 +1,122 @@
+# KhplwakProperty/settings.py
+import os
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = 'django-insecure-&hyareze@g25%efgyzh^1h^tj^+bmvly^qhhurin(=3)#eujzo'
-DEBUG = True
+# ── Security / Debug
+SECRET_KEY = os.environ.get("SECRET_KEY", "dev-insecure-key-only-for-local")
+DEBUG = os.environ.get("DEBUG", "True").lower() == "true"  # True for local, set False on Render
 
-# Keep just one ALLOWED_HOSTS definition
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
+ALLOWED_HOSTS = ["127.0.0.1", "localhost", ".onrender.com"]
 
+# ── Apps
 INSTALLED_APPS = [
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'dealer',
-    'widget_tweaks',
-    'accounts',
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+    "dealer",
+    "widget_tweaks",
+    "accounts",
 ]
 
+# ── Middleware
 MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "django.middleware.security.SecurityMiddleware",
+    # WhiteNoise right after SecurityMiddleware
+    "whitenoise.middleware.WhiteNoiseMiddleware",
+
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
+
+    # custom (defined in dealer/middleware.py)
+    "dealer.middleware.NoCacheForAuthenticatedPages",
 ]
 
-ROOT_URLCONF = 'KhplwakProperty.urls'
+ROOT_URLCONF = "KhplwakProperty.urls"
 
 TEMPLATES = [
     {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [
-            BASE_DIR / 'templates',          # project-level templates
-            BASE_DIR / 'dealer' / 'templates',
-            BASE_DIR / 'accounts' / 'templates',
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [
+            BASE_DIR / "templates",
+            BASE_DIR / "dealer" / "templates",
+            BASE_DIR / "accounts" / "templates",
         ],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
             ],
         },
     },
 ]
 
-WSGI_APPLICATION = 'KhplwakProperty.wsgi.application'
+WSGI_APPLICATION = "KhplwakProperty.wsgi.application"
 
+# ── Database (SQLite for now)
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+    "default": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "db.sqlite3",
     }
 }
 
+# ── Auth validators
 AUTH_PASSWORD_VALIDATORS = [
-    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
-    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
-    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
-    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
-    'dealer.middleware.NoCacheForAuthenticatedPages',
+    {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
+    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
+    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
+    {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
 
-LANGUAGE_CODE = 'en-us'
-TIME_ZONE = 'UTC'
+LANGUAGE_CODE = "en-us"
+TIME_ZONE = "UTC"
 USE_I18N = True
 USE_TZ = True
 
-# -------- Static & media --------
-STATIC_URL = '/static/'
+# ── Static & Media
+STATIC_URL = "/static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"  # collectstatic target
 
-# where collectstatic will gather files (useful for prod or testing collectstatic)
-STATIC_ROOT = BASE_DIR / 'staticfiles'
-
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
-
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-# Auth redirects
-LOGIN_REDIRECT_URL = 'home'
-LOGOUT_REDIRECT_URL = 'home'
-LOGIN_URL = 'login'
-
-# CSRF: add any tunnels/domains you use here
-CSRF_TRUSTED_ORIGINS = [
-    'http://127.0.0.1:8000',
-    'http://localhost:8000',
-    # 'https://*.ngrok-free.app',
-    # 'https://your-dev-domain.com',
-
-
+# Optional project-level static (keep if you have /static)
+STATICFILES_DIRS = [
+    BASE_DIR / "static",            # OK if this folder exists; remove if you don't use it
+    BASE_DIR / "dealer" / "static", # app static
 ]
 
-# dealer/middleware.py
-class NoCacheForAuthenticatedPages:
-    def __init__(self, get_response):
-        self.get_response = get_response
+# WhiteNoise hashed + compressed files
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
-    def __call__(self, request):
-        response = self.get_response(request)
-        if request.user.is_authenticated:
-            response["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
-            response["Pragma"] = "no-cache"
-            response["Expires"] = "0"
-        return response
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
 
-# Security for deployment
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# ── Auth redirects
+LOGIN_REDIRECT_URL = "home"
+LOGOUT_REDIRECT_URL = "home"
+LOGIN_URL = "login"
+
+# ── CSRF trusted origins
+CSRF_TRUSTED_ORIGINS = [
+    "http://127.0.0.1:8000",
+    "http://localhost:8000",
+    "https://khplwakproperty.onrender.com",
+    "https://*.onrender.com",
+]
+
+# ── Production-only security
+if not DEBUG:
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
