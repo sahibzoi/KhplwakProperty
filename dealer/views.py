@@ -396,13 +396,13 @@ def commission_create(request):
             form.fields['property_item'].widget = forms.HiddenInput()
 
     return render(
-    request,
-    'dealer/commission_form.html',   # ← use the file you already have
-    {
-        'form': form,
-        'property_id': locked_property.id if locked_property else None,
-    }
-)
+        request,
+        'dealer/commission_form.html',
+        {
+            'form': form,
+            'locked_property': locked_property,
+        }
+    )
 
 
 @login_required

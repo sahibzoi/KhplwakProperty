@@ -142,14 +142,25 @@ class PropertyItem(models.Model):
 
 
 class Transaction(models.Model):
+    TRANSACTION_TYPE_CHOICES = [
+        ('buy', 'Buy / Money Spent'),
+        ('sell', 'Sell / Money Received'),
+    ]
+
     property_item    = models.ForeignKey(PropertyItem, on_delete=models.CASCADE)
     investor         = models.ForeignKey(Investor, on_delete=models.CASCADE)
-    transaction_type = models.CharField(max_length=10)  # "buy" or "sell"
+
+    transaction_type = models.CharField(
+        max_length=10,
+        choices=TRANSACTION_TYPE_CHOICES
+    )
+
     amount           = models.DecimalField(max_digits=18, decimal_places=2)
     transaction_date = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"{self.transaction_type} - {self.property_item.address}"
+
 
 
 class Commission(models.Model):
