@@ -1,0 +1,467 @@
+{% extends 'dealer/base.html' %}
+{% block title %}Dashboard | Khplwak Property{% endblock %}
+{% block content %}
+
+<style>
+/* --- carryover styles from your last version, plus small tweaks --- */
+
+.dash-header-card {
+    background: linear-gradient(90deg,#065f46 0%, #0f766e 60%);
+    border-radius: 1rem;
+    color: #fff;
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    row-gap: 1rem;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+    border: 1px solid rgba(255,255,255,0.08);
+}
+.dash-left h2 {
+    font-size: 1.05rem;
+    font-weight: 600;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    color: #fff;
+}
+.dash-left h2 i {
+    color:#facc15;
+    font-size:1.2rem;
+}
+.dash-left .sub {
+    font-size:.8rem;
+    line-height:1.2rem;
+    color: rgba(255,255,255,.8);
+}
+.dash-right-stats {
+    display: flex;
+    flex-direction: column;
+    text-align: right;
+    min-width: 160px;
+}
+.dash-stat-label {
+    font-size:.7rem;
+    font-weight:600;
+    color:rgba(255,255,255,.7);
+    text-transform:uppercase;
+    line-height:1rem;
+    letter-spacing:.03em;
+}
+.dash-stat-value {
+    font-size:1rem;
+    font-weight:600;
+    line-height:1.2rem;
+    color:#fff;
+}
+
+/* KPI cards row */
+.kpi-card {
+    background:#fff;
+    border-radius: .9rem;
+    box-shadow:0 8px 24px rgba(0,0,0,.06);
+    border:1px solid rgba(0,0,0,.04);
+    padding:1rem 1rem 1rem;
+    height:100%;
+}
+.kpi-label {
+    font-size:.75rem;
+    font-weight:600;
+    color:#6b7280;
+    text-transform:uppercase;
+    letter-spacing:.04em;
+    line-height:1rem;
+    margin-bottom:.25rem;
+}
+.kpi-value {
+    font-size:1.1rem;
+    font-weight:600;
+    color:#111827;
+    line-height:1.3rem;
+}
+.kpi-extra {
+    font-size:.75rem;
+    color:#6b7280;
+    line-height:1rem;
+}
+.kpi-icon {
+    width:42px;
+    height:42px;
+    border-radius:.6rem;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#fff;
+    font-size:1.1rem;
+    box-shadow:0 10px 20px rgba(0,0,0,.2);
+}
+
+/* section cards (bottom half) */
+.section-card {
+    background:#fff;
+    border-radius:1rem;
+    box-shadow:0 12px 30px rgba(0,0,0,.06);
+    border:1px solid rgba(0,0,0,.04);
+    overflow:hidden;
+}
+.section-head {
+    background:#f0fdf4;
+    border-bottom:1px solid rgba(0,0,0,.06);
+    padding:.9rem 1rem;
+    font-weight:600;
+    font-size:.9rem;
+    color:#065f46;
+    display:flex;
+    align-items:center;
+    gap:.5rem;
+}
+.section-head i {
+    color:#065f46;
+    font-size:1rem;
+}
+.section-body {
+    padding:1rem 1rem 1.25rem;
+    font-size:.85rem;
+    color:#111827;
+}
+
+/* rows in property / finance summaries */
+.status-row {
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    font-size:.85rem;
+    margin-bottom:.75rem;
+}
+.status-left-label {
+    display:flex;
+    align-items:center;
+    gap:.5rem;
+    flex-wrap:wrap;
+}
+.status-badge {
+    display:inline-block;
+    min-width:62px;
+    padding:.3rem .5rem;
+    border-radius:.5rem;
+    font-weight:600;
+    font-size:.7rem;
+    line-height:1rem;
+    color:#fff;
+    text-align:center;
+    text-transform:capitalize;
+}
+.bg-available { background-color:#16a34a; }
+.bg-sold      { background-color:#b91c1c; }
+.bg-rented    { background-color:#2563eb; }
+.bg-grawi     { background-color:#ca8a04; }
+
+.money-row-label {
+    font-size:.8rem;
+    font-weight:600;
+    color:#6b7280;
+    text-transform:uppercase;
+    letter-spacing:.03em;
+    line-height:1rem;
+}
+.money-row-value {
+    font-size:.9rem;
+    font-weight:600;
+    line-height:1.2rem;
+}
+
+.text-money-in      { color:#065f46; }      /* Capital Invested */
+.text-money-return  { color:#92400e; }      /* Capital Returned (gold/brown tone instead of red) */
+.text-money-comm    { color:#1e3a8a; }      /* Commission (blue) */
+
+/* rent/grawi chip styling inside KPI */
+.sub-pill {
+    display:inline-block;
+    background:#f0fdf4;
+    border:1px solid #065f4622;
+    border-radius:.4rem;
+    font-size:.7rem;
+    font-weight:500;
+    line-height:1rem;
+    padding:.25rem .5rem;
+    color:#065f46;
+    white-space:nowrap;
+}
+.sub-pill-alt {
+    background:#fffbeb;
+    border:1px solid #ca8a041f;
+    color:#92400e;
+}
+</style>
+
+
+<!-- HEADER CARD -->
+<div class="dash-header-card mb-4">
+    <div class="dash-left">
+        <h2>
+            <i class="bi bi-speedometer2"></i>
+            <span>Dashboard</span>
+        </h2>
+        <div class="sub">
+            Khplwak Property Dealer System<br>
+            <small>Live overview of deals, investors and cash flow</small>
+        </div>
+    </div>
+
+    <div class="dash-right-stats">
+        <div class="dash-stat-label">Total Properties</div>
+        <div class="dash-stat-value">{{ property_count }}</div>
+
+        <div class="dash-stat-label mt-3">Total Investors</div>
+        <div class="dash-stat-value">{{ investor_count }}</div>
+    </div>
+</div>
+
+
+<!-- KPI CARDS ROW -->
+<div class="row g-3 mb-4">
+
+    <!-- Properties KPI -->
+    <div class="col-md-6 col-xl-3">
+        <div class="kpi-card">
+            <div class="d-flex justify-content-between">
+                <div>
+                    <div class="kpi-label">Properties</div>
+                    <div class="kpi-value">{{ property_count }}</div>
+                    <div class="kpi-extra">
+                        {{ available_count }} Available / {{ sold_count }} Sold
+                    </div>
+                </div>
+
+                <div class="kpi-icon"
+                     style="background:linear-gradient(135deg,#1e3a8a 0%,#3b82f6 100%);">
+                    <i class="bi bi-building"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Investors KPI -->
+    <div class="col-md-6 col-xl-3">
+        <div class="kpi-card">
+            <div class="d-flex justify-content-between">
+                <div>
+                    <div class="kpi-label">Investors</div>
+                    <div class="kpi-value">{{ investor_count }}</div>
+                    <div class="kpi-extra">
+                        {{ transaction_count }} Total Transactions
+                    </div>
+                </div>
+
+                <div class="kpi-icon"
+                     style="background:linear-gradient(135deg,#065f46 0%,#10b981 100%);">
+                    <i class="bi bi-people-fill"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Capital In KPI -->
+    <div class="col-md-6 col-xl-3">
+        <div class="kpi-card">
+            <div class="d-flex justify-content-between">
+                <div>
+                    <div class="kpi-label">Capital In</div>
+                    <div class="kpi-value text-money-in">
+                        ؋ {{ total_invested|floatformat:0 }}
+                    </div>
+                    <div class="kpi-extra">
+                        Investor money in deals
+                    </div>
+                </div>
+
+                <div class="kpi-icon"
+                     style="background:linear-gradient(135deg,#14532d 0%,#22c55e 100%);">
+                    <i class="bi bi-arrow-down-circle-fill"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Capital Returned KPI (UPDATED COLOR) -->
+    <div class="col-md-6 col-xl-3">
+        <div class="kpi-card">
+            <div class="d-flex justify-content-between">
+                <div>
+                    <div class="kpi-label">Capital Returned</div>
+                    <div class="kpi-value text-money-return">
+                        ؋ {{ total_returned|floatformat:0 }}
+                    </div>
+                    <div class="kpi-extra">
+                        Sales / repayments
+                    </div>
+                </div>
+
+                <div class="kpi-icon"
+                     style="background:linear-gradient(135deg,#92400e 0%,#facc15 100%);">
+                    <i class="bi bi-arrow-up-circle-fill"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+<!-- SECOND KPI ROW: Rent & Grawi (NEW CARD) + Commission -->
+<div class="row g-3 mb-4">
+
+    <!-- Rent / Grawi KPI (NEW) -->
+    <div class="col-md-6 col-xl-3">
+        <div class="kpi-card">
+            <div class="d-flex justify-content-between">
+                <div>
+                    <div class="kpi-label">Rent & Grawi</div>
+
+                    <div class="kpi-value" style="color:#1e40af;">
+                        {{ rented_count }} Rent
+                    </div>
+
+                    <div class="kpi-extra mb-1">
+                        <span class="sub-pill">
+                            {{ rented_count }} Rented
+                        </span>
+                        <span class="sub-pill sub-pill-alt ms-1">
+                            {{ mortgaged_count }} Grawi
+                        </span>
+                    </div>
+
+                    <div class="kpi-extra">
+                        Active cash flow properties
+                    </div>
+                </div>
+
+                <div class="kpi-icon"
+                     style="background:linear-gradient(135deg,#1e40af 0%,#3b82f6 100%);">
+                    <i class="bi bi-house-door-fill"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Commission KPI -->
+    <div class="col-md-6 col-xl-3">
+        <div class="kpi-card">
+            <div class="d-flex justify-content-between">
+                <div>
+                    <div class="kpi-label">Dealer Commission</div>
+                    <div class="kpi-value text-money-comm">
+                        ؋ {{ total_commissions|floatformat:0 }}
+                    </div>
+                    <div class="kpi-extra">
+                        Earned from closed deals
+                    </div>
+                </div>
+
+                <div class="kpi-icon"
+                     style="background:linear-gradient(135deg,#1e3a8a 0%,#6366f1 100%);">
+                    <i class="bi bi-cash-coin"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- spacer cards so layout doesn't break if you only want 4 cards per row on xl -->
+    <div class="col-md-6 col-xl-3 d-none d-xl-block"></div>
+    <div class="col-md-6 col-xl-3 d-none d-xl-block"></div>
+</div>
+
+
+<!-- LOWER SECTIONS -->
+<div class="row g-3">
+
+    <!-- Property Overview -->
+    <div class="col-lg-6">
+        <div class="section-card">
+            <div class="section-head">
+                <i class="bi bi-clipboard-data"></i>
+                <span>Property Overview</span>
+            </div>
+
+            <div class="section-body">
+
+                <div class="status-row">
+                    <div class="status-left-label">
+                        <span class="status-badge bg-available">{{ available_count }}</span>
+                        <span>Available</span>
+                    </div>
+                    <div>{{ available_count }} units ready</div>
+                </div>
+
+                <div class="status-row">
+                    <div class="status-left-label">
+                        <span class="status-badge bg-rented">{{ rented_count }}</span>
+                        <span>Rented</span>
+                    </div>
+                    <div>{{ rented_count }} active rentals</div>
+                </div>
+
+                <div class="status-row">
+                    <div class="status-left-label">
+                        <span class="status-badge bg-grawi">{{ mortgaged_count }}</span>
+                        <span>Grawi / Mortgage</span>
+                    </div>
+                    <div>{{ mortgaged_count }} active grawi</div>
+                </div>
+
+                <div class="status-row">
+                    <div class="status-left-label">
+                        <span class="status-badge bg-sold">{{ sold_count }}</span>
+                        <span>Sold</span>
+                    </div>
+                    <div>{{ sold_count }} completed</div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Financial Summary -->
+    <div class="col-lg-6">
+        <div class="section-card">
+            <div class="section-head">
+                <i class="bi bi-cash-stack"></i>
+                <span>Financial Summary</span>
+            </div>
+
+            <div class="section-body">
+                <div class="status-row">
+                    <div class="money-row-label">Capital In</div>
+                    <div class="money-row-value text-money-in">
+                        ؋ {{ total_invested|floatformat:0 }}
+                    </div>
+                </div>
+
+                <div class="status-row">
+                    <div class="money-row-label">Capital Returned</div>
+                    <div class="money-row-value text-money-return">
+                        ؋ {{ total_returned|floatformat:0 }}
+                    </div>
+                </div>
+
+                <div class="status-row">
+                    <div class="money-row-label">Dealer Commission</div>
+                    <div class="money-row-value text-money-comm">
+                        ؋ {{ total_commissions|floatformat:0 }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-end mt-3">
+            <a href="{% url 'finance_report' %}" class="btn btn-sm btn-outline-secondary">
+                <i class="bi bi-graph-up-arrow me-1"></i>
+                Full Finance Report
+            </a>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,291 @@
+{% extends 'dealer/base.html' %}
+{% block title %}Backup & Tools | Khplwak Property{% endblock %}
+
+{% block content %}
+
+<style>
+.tools-wrapper {
+    border-radius: 1rem;
+    background: #ffffff;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.06);
+    border: 1px solid rgba(0,0,0,0.05);
+    overflow: hidden;
+}
+
+/* Header bar */
+.tools-head {
+    background: linear-gradient(90deg,#065f46 0%,#0f766e 100%);
+    color: #fff;
+    padding: 1rem 1.25rem;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: flex-start;
+    row-gap: .75rem;
+}
+
+.tools-head-left {
+    display: flex;
+    flex-direction: column;
+    gap: .25rem;
+}
+
+.tools-head-title {
+    font-weight: 600;
+    font-size: 1rem;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+}
+.tools-head-title i {
+    color: #facc15;
+    font-size: 1.3rem;
+}
+.tools-head-sub {
+    font-size: .8rem;
+    color: rgba(255,255,255,.8);
+    line-height: 1.2rem;
+}
+
+/* body */
+.tools-body {
+    padding: 1.5rem 1.25rem 2rem;
+}
+
+/* each option card */
+.tool-card {
+    border: 1px solid rgba(0,0,0,0.06);
+    border-radius: .75rem;
+    background-color: #fff;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.04);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.tool-card-head {
+    display: flex;
+    align-items: flex-start;
+    gap: .75rem;
+    padding: 1rem 1rem .5rem;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.tool-icon-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: .75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #fff;
+    flex-shrink: 0;
+}
+
+/* icon color themes */
+.icon-backup {
+    background: radial-gradient(circle at 30% 20%, #4ade80 0%, #065f46 70%);
+}
+.icon-props {
+    background: radial-gradient(circle at 30% 20%, #93c5fd 0%, #1e40af 70%);
+}
+.icon-report {
+    background: radial-gradient(circle at 30% 20%, #fde68a 0%, #92400e 70%);
+}
+
+.tool-card-title {
+    font-size: .95rem;
+    font-weight: 600;
+    color: #111827;
+    line-height: 1.2rem;
+    margin-bottom: .25rem;
+}
+.tool-card-desc {
+    font-size: .8rem;
+    color: #6b7280;
+    line-height: 1.1rem;
+}
+
+/* footer */
+.tool-card-foot {
+    margin-top: auto;
+    padding: .75rem 1rem 1rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+    justify-content: flex-start;
+}
+
+/* buttons reused from project style */
+.btn-action-main {
+    background: linear-gradient(90deg, #065f46 0%, #0f766e 100%);
+    border: none;
+    border-radius: .5rem;
+    font-weight: 600;
+    color: #fff !important;
+    padding: .5rem .8rem;
+    font-size: .8rem;
+    line-height: 1rem;
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    text-decoration: none;
+}
+.btn-action-main:hover {
+    background: linear-gradient(90deg, #0f766e 0%, #065f46 100%);
+    color: #fff !important;
+    text-decoration: none;
+}
+
+.btn-outline-lite {
+    border-radius: .5rem;
+    border: 1px solid #065f46;
+    background-color: #ecfdf5;
+    color: #065f46;
+    font-weight: 600;
+    font-size: .8rem;
+    line-height: 1rem;
+    padding: .45rem .7rem;
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    text-decoration: none;
+}
+.btn-outline-lite:hover {
+    background-color: #065f46;
+    color: #fff;
+    text-decoration: none;
+}
+</style>
+
+<div class="tools-wrapper">
+
+    <!-- HEADER -->
+    <div class="tools-head">
+        <div class="tools-head-left">
+            <div class="tools-head-title">
+                <i class="bi bi-cloud-arrow-down"></i>
+                <span>Backup &amp; Tools</span>
+            </div>
+            <div class="tools-head-sub">
+                Export your business data, keep offline copies, and prepare records for accountant / partner.
+            </div>
+        </div>
+
+        <div class="text-end" style="min-width:180px;">
+            <div style="font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:rgba(255,255,255,.7);">
+                Logged in
+            </div>
+            <div style="font-size:.9rem;font-weight:600;color:#fff;line-height:1.2rem;">
+                {% if request.user.is_authenticated %}
+                    {{ request.user.username }}
+                {% else %}
+                    Dealer
+                {% endif %}
+            </div>
+            <div style="font-size:.7rem;color:rgba(255,255,255,.6);line-height:1rem;">
+                Secure export only
+            </div>
+        </div>
+    </div>
+
+    <!-- BODY -->
+    <div class="tools-body">
+        <div class="row g-4">
+
+            <!-- CARD 1: FULL CSV BACKUP -->
+            <div class="col-md-4">
+                <div class="tool-card">
+                    <div class="tool-card-head">
+                        <div class="tool-icon-circle icon-backup">
+                            <i class="bi bi-shield-lock-fill"></i>
+                        </div>
+                        <div>
+                            <div class="tool-card-title">Full Data Backup</div>
+                            <div class="tool-card-desc">
+                                One CSV containing Investors, Expenses, Income.
+                                Good for offline copy, accountant, dispute proof.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tool-card-foot">
+                        <a href="{% url 'export_backup_csv' %}" class="btn-action-main">
+                            <i class="bi bi-download"></i>
+                            <span>Download Backup CSV</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CARD 2: PROPERTY EXPORT -->
+            <div class="col-md-4">
+                <div class="tool-card">
+                    <div class="tool-card-head">
+                        <div class="tool-icon-circle icon-props">
+                            <i class="bi bi-building"></i>
+                        </div>
+                        <div>
+                            <div class="tool-card-title">Property Inventory</div>
+                            <div class="tool-card-desc">
+                                Export all active / sold / rented properties with pricing and owner contact.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tool-card-foot">
+                        <a href="{% url 'property_list' %}" class="btn-outline-lite">
+                            <i class="bi bi-list-ul"></i>
+                            <span>View Properties</span>
+                        </a>
+                        <a href="{% url 'export_properties_csv' %}" class="btn-action-main">
+                            <i class="bi bi-file-spreadsheet"></i>
+                            <span>Export Properties CSV</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CARD 3: FINANCE SNAPSHOT -->
+            <div class="col-md-4">
+                <div class="tool-card">
+                    <div class="tool-card-head">
+                        <div class="tool-icon-circle icon-report">
+                            <i class="bi bi-clipboard-data"></i>
+                        </div>
+                        <div>
+                            <div class="tool-card-title">Finance Snapshot</div>
+                            <div class="tool-card-desc">
+                                See total income, total expenses, net balance, and where the money is going.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tool-card-foot">
+                        <a href="{% url 'finance_report' %}" class="btn-action-main">
+                            <i class="bi bi-graph-up-arrow"></i>
+                            <span>Open Finance Report</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- EXTRA ROW: REMINDER -->
+        <div class="mt-4 p-3 rounded-3 border"
+             style="background-color:#fffbea;border-color:#fde68a;color:#92400e;font-size:.8rem;line-height:1.2rem;">
+            <div class="fw-semibold" style="font-size:.8rem;color:#92400e;">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                Reminder
+            </div>
+            <div style="font-size:.8rem;color:#92400e;">
+                Keep your backups in a safe place. Do not share with clients.
+                This file includes money records and investor contact numbers.
+            </div>
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}

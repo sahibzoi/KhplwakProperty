@@ -1,0 +1,409 @@
+{% extends 'dealer/base.html' %}
+{% load currency_filters %}
+{% block content %}
+
+<style>
+    /* Status badge styles */
+    .badge-status {
+        padding: 0.45rem 0.75rem;
+        font-size: 0.8rem;
+        border-radius: 0.5rem;
+        font-weight: 600;
+        text-transform: capitalize;
+        line-height: 1rem;
+        display: inline-block;
+        min-width: 90px;
+        text-align: center;
+    }
+    .badge-available { background-color: #16a34a; color: #fff; }
+    .badge-sold { background-color: #b91c1c; color: #fff; }
+    .badge-rented { background-color: #1d4ed8; color: #fff; }
+    .badge-mortgaged { background-color: #d97706; color: #fff; }
+    .badge-pending { background-color: #ca8a04; color: #fff; }
+
+    /* Table header style */
+    .table thead th {
+        background-color: #fefce8;
+        color: #064e3b;
+        font-weight: 600;
+        border-bottom: 2px solid #eab308;
+        font-size: 0.8rem;
+        vertical-align: middle;
+    }
+    .table td {
+        vertical-align: middle;
+        font-size: 0.9rem;
+    }
+    .table tbody tr:hover {
+        background-color: #f9fafb;
+        transition: 0.15s;
+    }
+
+    /* Buttons */
+    .btn-add {
+        background: linear-gradient(90deg, #065f46 0%, #0f766e 100%);
+        border: none;
+        border-radius: 0.5rem;
+        font-weight: 600;
+        color: white;
+        padding: 0.45rem 0.8rem;
+        font-size: 0.9rem;
+        line-height: 1.2rem;
+    }
+    .btn-add:hover {
+        background: linear-gradient(90deg, #0f766e 0%, #065f46 100%);
+        color: #fff;
+    }
+
+    .btn-export {
+        background: #facc15;
+        color: #000;
+        border: none;
+        border-radius: 0.5rem;
+        font-weight: 600;
+        padding: 0.45rem 0.8rem;
+        font-size: 0.9rem;
+        line-height: 1.2rem;
+    }
+    .btn-export:hover {
+        background: #eab308;
+        color: #000;
+    }
+
+    .btn-action-sm {
+        border-radius: 0.5rem;
+        padding: 0.45rem 0.6rem;
+        font-size: 0.8rem;
+        font-weight: 500;
+        line-height: 1rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 34px;
+        height: 34px;
+    }
+
+    .btn-view {
+        background-color: #0ea5e9;
+        border: none;
+        color: #fff;
+    }
+    .btn-view:hover {
+        background-color: #0284c7;
+        color: #fff;
+    }
+
+    .btn-edit {
+        background-color: #0f766e;
+        border: none;
+        color: #fff;
+    }
+    .btn-edit:hover {
+        background-color: #065f46;
+        color: #fff;
+    }
+
+    .btn-delete {
+        background-color: #dc2626;
+        border: none;
+        color: #fff;
+    }
+    .btn-delete:hover {
+        background-color: #b91c1c;
+        color: #fff;
+    }
+
+    /* Filter Bar */
+    .filter-bar-wrapper {
+        background: #f0fdf4;
+        border-radius: 0.8rem;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+        border: 1px solid rgba(0,0,0,0.03);
+        padding: 0.75rem 1rem 0.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .filter-label {
+        font-weight: 600;
+        color: #065f46;
+        font-size: 0.8rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+        border-color: #0d9488;
+        box-shadow: 0 0 0 0.2rem rgba(13,148,136,.25);
+    }
+
+    @media (min-width: 768px) {
+        .filter-apply-col {
+            display: flex;
+            align-items: end;
+        }
+    }
+
+    .btn-apply {
+        background: #0f766e;
+        border: none;
+        border-radius: 0.5rem;
+        font-weight: 600;
+        color: #fff;
+        width: 100%;
+    }
+    .btn-apply:hover {
+        background: #065f46;
+        color: #fff;
+    }
+
+    .prop-id-label {
+        font-size: 0.7rem;
+        color: #6b7280;
+        font-weight: 500;
+    }
+
+</style>
+
+<!-- Header row -->
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h3 class="fw-bold text-success d-flex align-items-center mb-0">
+            <i class="bi bi-building me-2 text-warning"></i>
+            Properties
+        </h3>
+        <small class="text-muted">All Sale / Rent / Mortgage listings</small>
+    </div>
+
+    <div class="d-flex gap-2">
+        {# Export with filters #}
+        <a href="{% url 'export_properties_csv' %}?q={{ q }}&listing_type={{ selected_listing_type }}&status={{ selected_status }}"
+           class="btn-export btn-sm text-decoration-none d-inline-flex align-items-center gap-1">
+            <i class="bi bi-file-earmark-spreadsheet"></i>
+            <span>Export CSV</span>
+        </a>
+
+        <a href="{% url 'property_create' %}"
+           class="btn-add btn-sm text-decoration-none d-inline-flex align-items-center gap-1">
+            <i class="bi bi-plus-circle"></i>
+            <span>Add Property</span>
+        </a>
+    </div>
+</div>
+
+<!-- Filter/Search Bar -->
+<div class="filter-bar-wrapper">
+    <form method="get" class="row gy-2 gx-3">
+        <!-- Search text -->
+        <div class="col-md-4">
+            <label class="filter-label">Search</label>
+            <input type="text"
+                   name="q"
+                   value="{{ q }}"
+                   class="form-control"
+                   placeholder="Search by address, city or area">
+        </div>
+
+        <!-- Listing Type -->
+        <div class="col-md-3">
+            <label class="filter-label">Listing Type</label>
+            <select name="listing_type" class="form-select">
+                <option value="">All</option>
+                <option value="sale" {% if selected_listing_type == 'sale' %}selected{% endif %}>For Sale</option>
+                <option value="rent" {% if selected_listing_type == 'rent' %}selected{% endif %}>For Rent</option>
+                <option value="mortgage" {% if selected_listing_type == 'mortgage' %}selected{% endif %}>Mortgage / Grawi</option>
+                <option value="other" {% if selected_listing_type == 'other' %}selected{% endif %}>Other</option>
+            </select>
+        </div>
+
+        <!-- Status -->
+        <div class="col-md-3">
+            <label class="filter-label">Status</label>
+            <select name="status" class="form-select">
+                <option value="">All</option>
+                <option value="available" {% if selected_status == 'available' %}selected{% endif %}>Available</option>
+                <option value="sold" {% if selected_status == 'sold' %}selected{% endif %}>Sold</option>
+                <option value="rented" {% if selected_status == 'rented' %}selected{% endif %}>Rented</option>
+                <option value="mortgaged" {% if selected_status == 'mortgaged' %}selected{% endif %}>Mortgaged</option>
+                <option value="pending" {% if selected_status == 'pending' %}selected{% endif %}>Pending</option>
+            </select>
+        </div>
+
+        <!-- Apply button -->
+        <div class="col-md-2 filter-apply-col">
+            <button type="submit" class="btn-apply">
+                <i class="bi bi-filter-circle"></i>
+                Apply Filters
+            </button>
+        </div>
+    </form>
+</div>
+
+<!-- Property Table -->
+<div class="table-responsive bg-white shadow-sm rounded">
+    <table class="table table-striped mb-0 align-middle">
+        <thead>
+            <tr>
+                <th>Address</th>
+                <th>Type</th>
+                <th>Listing</th>
+                <th>Price</th>
+                <th>Status</th>
+                <th style="width:180px;">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for p in properties %}
+            <tr>
+                <!-- Address / Area / City / ID -->
+                <td>
+                    <div class="fw-semibold text-dark">
+                        {{ p.address|default:"(no address)" }}
+                    </div>
+
+                    <div class="text-muted small">
+                        {% if p.area_name %}{{ p.area_name }}{% endif %}
+                        {% if p.area_name and p.city %}, {% endif %}
+                        {% if p.city %}{{ p.city }}{% endif %}
+                    </div>
+
+                    {% if p.size %}
+                        <div class="text-muted small">Size: {{ p.size }} Biswa</div>
+                    {% endif %}
+
+                    <div class="prop-id-label">ID: {{ p.id }}</div>
+                </td>
+
+                <!-- Property Type -->
+                <td>
+                    {% if p.property_type %}
+                        {{ p.property_type }}
+                    {% else %}
+                        <span class="text-muted">—</span>
+                    {% endif %}
+                </td>
+
+                <!-- Listing Type -->
+                <td>
+                    {% if p.get_listing_type_display %}
+                        {{ p.get_listing_type_display }}
+                    {% else %}
+                        <span class="text-muted">—</span>
+                    {% endif %}
+                </td>
+
+                <!-- Pricing logic -->
+                <td>
+                    {% if p.listing_type == 'sale' and p.sale_price %}
+                        {{ p.sale_price|afn }}
+                    {% elif p.listing_type == 'rent' and p.rent_monthly %}
+                        {{ p.rent_monthly|afn }}/month
+                        {% if p.rent_deposit %}
+                            <div class="text-muted small">
+                                Deposit: {{ p.rent_deposit|afn }}
+                            </div>
+                        {% endif %}
+                    {% elif p.listing_type == 'mortgage' and p.mortgage_amount %}
+                        {{ p.mortgage_amount|afn }}
+                        {% if p.mortgage_terms %}
+                            <div class="text-muted small">
+                                Terms:
+                                {{ p.mortgage_terms|slice:":40" }}{% if p.mortgage_terms|length > 40 %}...{% endif %}
+                            </div>
+                        {% endif %}
+                    {% else %}
+                        <span class="text-muted">—</span>
+                    {% endif %}
+                </td>
+
+                <!-- Status -->
+                <td>
+                    {% if p.status == 'available' %}
+                        <span class="badge-status badge-available">Available</span>
+                    {% elif p.status == 'sold' %}
+                        <span class="badge-status badge-sold">Sold</span>
+                    {% elif p.status == 'rented' %}
+                        <span class="badge-status badge-rented">Rented</span>
+                    {% elif p.status == 'mortgaged' %}
+                        <span class="badge-status badge-mortgaged">Mortgaged</span>
+                    {% elif p.status == 'pending' %}
+                        <span class="badge-status badge-pending">Pending</span>
+                    {% else %}
+                        <span class="badge-status bg-secondary text-white">Unknown</span>
+                    {% endif %}
+                </td>
+
+                <!-- Actions -->
+               <td class="text-end" style="white-space:nowrap;">
+
+  <!-- View -->
+  <a href="{% url 'property_detail' p.id %}" class="btn-table-sm btn-view mb-1">
+    <i class="bi bi-eye"></i> View
+  </a>
+
+  <!-- Edit -->
+  <a href="{% url 'property_edit' p.id %}" class="btn-table-sm btn-edit mb-1">
+    <i class="bi bi-pencil-square"></i> Edit
+  </a>
+
+  <!-- Delete trigger -->
+  <button type="button"
+          class="btn-table-sm btn-delete mb-1"
+          data-bs-toggle="modal"
+          data-bs-target="#deletePropertyModal{{ p.id }}">
+    <i class="bi bi-trash"></i> Delete
+  </button>
+
+  <!-- Modal -->
+  <div class="modal fade" id="deletePropertyModal{{ p.id }}" tabindex="-1"
+       aria-labelledby="deletePropertyLabel{{ p.id }}" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow-sm rounded-3">
+        <div class="modal-header text-white rounded-top"
+             style="background:linear-gradient(90deg,#065f46,#0f766e);">
+          <h6 class="modal-title d-flex align-items-center gap-2" id="deletePropertyLabel{{ p.id }}">
+            <i class="bi bi-exclamation-triangle"></i>
+            Delete Property
+          </h6>
+          <button type="button" class="btn-close btn-close-white"
+                  data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+
+        <div class="modal-body">
+          <p class="mb-2">Delete this property from your system?</p>
+          <p class="small text-muted mb-0">
+            <i class="bi bi-building me-1"></i>
+            <strong>{{ p.address }}</strong><br>
+            {{ p.city }}{% if p.area_name %}, {{ p.area_name }}{% endif %}
+            <br>
+            Status: {{ p.status|title }}
+          </p>
+        </div>
+
+        <div class="modal-footer border-0">
+          <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <form action="{% url 'property_delete' p.id %}" method="post" class="d-inline">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-sm btn-danger">
+              <i class="bi bi-trash"></i> Delete
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</td>
+
+        {% empty %}
+            <tr>
+                <td colspan="6" class="text-center text-muted py-4">
+                    <i class="bi bi-info-circle"></i>
+                    No properties found.
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}

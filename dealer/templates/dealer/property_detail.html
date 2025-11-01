@@ -1,0 +1,677 @@
+{% extends 'dealer/base.html' %}
+{% load currency_filters %}
+{% block title %}Property Details | Khplwak Property{% endblock %}
+{% block content %}
+
+<style>
+/* Page wrapper */
+.page-wrap {
+    max-width: 1100px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Top header bar */
+.header-card {
+    background-color: #ffffff;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 8px 20px rgba(0,0,0,.04);
+    border-radius: .75rem;
+    padding: 1rem 1.25rem;
+    margin-bottom: 1.25rem;
+
+    display: flex;
+    flex-wrap: wrap;
+    row-gap: 1rem;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+/* left block: property basic */
+.header-left {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: .75rem;
+    min-width: 220px;
+}
+.prop-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: .6rem;
+    background-color: #065f46;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    box-shadow: 0 8px 16px rgba(0,0,0,.15);
+}
+.prop-headline {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #111827;
+    line-height: 1.4rem;
+}
+.prop-subline {
+    font-size: .8rem;
+    color: #6b7280;
+    line-height: 1rem;
+    margin-top: .25rem;
+}
+
+/* middle summary stats */
+.header-mid {
+    min-width: 200px;
+    font-size: .8rem;
+    line-height: 1.2rem;
+    color: #111827;
+}
+.header-mid-title {
+    font-size: .7rem;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+    color: #6b7280;
+    font-weight: 600;
+    margin-bottom: .4rem;
+}
+.mid-row {
+    display: flex;
+    justify-content: space-between;
+    gap: .5rem;
+    margin-bottom: .25rem;
+}
+.mid-label {
+    color: #4b5563;
+}
+.mid-value {
+    font-weight: 600;
+    color: #111827;
+    white-space: nowrap;
+}
+.mid-profit-pos {
+    color: #065f46;
+    font-weight: 600;
+}
+.mid-profit-neg {
+    color: #b91c1c;
+    font-weight: 600;
+}
+
+/* right actions */
+.header-right {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+    min-width: 220px;
+    justify-content: flex-end;
+}
+.action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    font-size: .8rem;
+    font-weight: 500;
+    line-height: 1rem;
+    background-color: #ffffff;
+    border: 1px solid #d1d5db;
+    color: #111827;
+    border-radius: .5rem;
+    padding: .55rem .75rem;
+    text-decoration: none;
+}
+.action-btn:hover {
+    background-color: #f9fafb;
+    border-color: #9ca3af;
+    text-decoration: none;
+    color: #111827;
+}
+.action-btn.back {
+    background-color: #065f46;
+    color: #fff;
+    border-color: #065f46;
+}
+.action-btn.back:hover {
+    background-color: #034133;
+    border-color: #034133;
+    color: #fff;
+}
+
+/* reusable card block */
+.card-block {
+    background-color: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: .75rem;
+    box-shadow: 0 8px 20px rgba(0,0,0,.04);
+    margin-bottom: 1.25rem;
+}
+.card-header {
+    border-bottom: 1px solid #e5e7eb;
+    padding: .9rem 1.25rem;
+    display: flex;
+    flex-wrap: wrap;
+    row-gap: .5rem;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+.card-title-left {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    font-size: .9rem;
+    font-weight: 600;
+    color: #111827;
+}
+.card-title-left i {
+    font-size: 1rem;
+    color: #065f46;
+}
+.card-title-right {
+    font-size: .8rem;
+    font-weight: 500;
+    color: #6b7280;
+}
+.card-body {
+    padding: 1rem 1.25rem 1.25rem;
+    font-size: .85rem;
+    color: #111827;
+}
+
+/* status badge */
+.status-pill {
+    display: inline-block;
+    border-radius: .5rem;
+    font-size: .7rem;
+    font-weight: 600;
+    line-height: 1rem;
+    padding: .35rem .6rem;
+    min-width: 70px;
+    text-align: center;
+    color: #fff;
+}
+.st-available { background-color: #16a34a; }
+.st-sold { background-color: #b91c1c; }
+.st-rented { background-color: #1d4ed8; }
+.st-mortgaged { background-color: #d97706; }
+.st-pending { background-color: #ca8a04; }
+.st-unknown { background-color: #6b7280; }
+
+/* Property info: definition layout */
+.info-grid {
+    display: grid;
+    grid-template-columns: 180px 1fr;
+    row-gap: .75rem;
+    column-gap: 1rem;
+    max-width: 100%;
+}
+.info-label {
+    font-size: .75rem;
+    font-weight: 600;
+    color: #4b5563;
+    line-height: 1rem;
+}
+.info-value {
+    font-size: .85rem;
+    color: #111827;
+    line-height: 1.2rem;
+}
+.info-muted {
+    color: #9ca3af;
+}
+
+/* Tables */
+.table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+}
+.table-clean {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: .8rem;
+    min-width: 600px;
+}
+.table-clean thead th {
+    text-align: left;
+    font-weight: 600;
+    font-size: .7rem;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+    color: #4b5563;
+    background-color: #f9fafb;
+    border-bottom: 1px solid #e5e7eb;
+    padding: .6rem .75rem;
+    white-space: nowrap;
+}
+.table-clean tbody td {
+    border-bottom: 1px solid #e5e7eb;
+    padding: .7rem .75rem;
+    vertical-align: top;
+    color: #111827;
+    line-height: 1.2rem;
+}
+.subtext {
+    font-size: .7rem;
+    color: #6b7280;
+    line-height: 1rem;
+    margin-top: .25rem;
+}
+.table-empty-row td {
+    text-align: center;
+    color: #6b7280;
+    font-size: .8rem;
+    padding: 2rem .75rem;
+}
+
+/* small badges in table */
+.badge-buy,
+.badge-sell,
+.badge-rent,
+.badge-mortgage {
+    display: inline-block;
+    border-radius: .4rem;
+    font-size: .7rem;
+    font-weight: 600;
+    line-height: 1rem;
+    padding: .3rem .5rem;
+    min-width: 44px;
+    text-align: center;
+}
+.badge-buy {
+    background-color: #dcfce7;
+    color: #065f46;
+}
+.badge-sell {
+    background-color: #fee2e2;
+    color: #7f1d1d;
+}
+.badge-rent {
+    background-color: #e0f2fe;
+    color: #075985;
+}
+.badge-mortgage {
+    background-color: #fef3c7;
+    color: #92400e;
+}
+
+/* responsive tweaks */
+@media (max-width: 768px) {
+    .header-card {
+        flex-direction: column;
+    }
+    .header-right {
+        justify-content: flex-start;
+    }
+
+    .info-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+
+<div class="page-wrap">
+
+    <!-- TOP HEADER: name + summary + actions -->
+    <div class="header-card">
+
+        <!-- LEFT: property identity -->
+        <div class="header-left">
+            <div class="prop-icon">
+                <i class="bi bi-building"></i>
+            </div>
+            <div>
+                <div class="prop-headline">
+                    {% if prop.address and prop.address|length > 0 %}
+                        {{ prop.address }}
+                    {% elif prop.city or prop.area_name %}
+                        {{ prop.city }}{% if prop.area_name %}, {{ prop.area_name }}{% endif %}
+                    {% else %}
+                        Property #{{ prop.id }}
+                    {% endif %}
+                </div>
+                <div class="prop-subline">
+                    {% if prop.get_listing_type_display %}
+                        {{ prop.get_listing_type_display }}
+                    {% endif %}
+                    {% if prop.city or prop.area_name %}
+                        ·
+                        {% if prop.city %}{{ prop.city }}{% endif %}
+                        {% if prop.area_name %}{% if prop.city %},{% endif %} {{ prop.area_name }}{% endif %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- MIDDLE: summary numbers -->
+        <div class="header-mid">
+            <div class="header-mid-title">This Property Summary</div>
+
+            <div class="mid-row">
+                <div class="mid-label">Total Invested</div>
+                <div class="mid-value">{{ total_invested|afn }}</div>
+            </div>
+
+            <div class="mid-row">
+                <div class="mid-label">Total Returned</div>
+                <div class="mid-value">{{ total_returned|afn }}</div>
+            </div>
+
+            <div class="mid-row">
+                <div class="mid-label">Net Result</div>
+                {% if net_result >= 0 %}
+                    <div class="mid-profit-pos">{{ net_result|afn }}</div>
+                {% else %}
+                    <div class="mid-profit-neg">{{ net_result|afn }}</div>
+                {% endif %}
+            </div>
+
+            <div class="mid-row">
+                <div class="mid-label">Commission Earned</div>
+                <div class="mid-value">{{ total_commission_earned|afn }}</div>
+            </div>
+        </div>
+
+        <!-- RIGHT: actions -->
+        <div class="header-right">
+            <a href="{% url 'transaction_create' %}?property={{ prop.id }}" class="action-btn">
+                <i class="bi bi-plus-circle"></i>
+                <span>Transaction</span>
+            </a>
+
+            <a href="{% url 'commission_create' %}?property={{ prop.id }}" class="action-btn">
+                <i class="bi bi-cash-coin"></i>
+                <span>Commission</span>
+            </a>
+
+            <a href="{% url 'property_list' %}" class="action-btn back">
+                <i class="bi bi-arrow-left"></i>
+                <span>Back</span>
+            </a>
+        </div>
+    </div>
+
+
+    <!-- CARD 1: PROPERTY INFO -->
+    <div class="card-block">
+        <div class="card-header">
+            <div class="card-title-left">
+                <i class="bi bi-info-circle"></i>
+                <span>Property Info</span>
+            </div>
+
+            <div class="card-title-right">
+                {% if prop.status %}
+                    {% if prop.status == 'available' %}
+                        <span class="status-pill st-available">{{ prop.status }}</span>
+                    {% elif prop.status == 'sold' %}
+                        <span class="status-pill st-sold">{{ prop.status }}</span>
+                    {% elif prop.status == 'rented' %}
+                        <span class="status-pill st-rented">{{ prop.status }}</span>
+                    {% elif prop.status == 'mortgaged' %}
+                        <span class="status-pill st-mortgaged">{{ prop.status }}</span>
+                    {% elif prop.status == 'pending' %}
+                        <span class="status-pill st-pending">{{ prop.status }}</span>
+                    {% else %}
+                        <span class="status-pill st-unknown">{{ prop.status }}</span>
+                    {% endif %}
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="card-body">
+            <div class="info-grid">
+
+                <div class="info-label">Type</div>
+                <div class="info-value">
+                    {% if prop.property_type %}
+                        {{ prop.property_type }}
+                    {% else %}
+                        <span class="info-muted">—</span>
+                    {% endif %}
+                </div>
+
+                <div class="info-label">Listing</div>
+                <div class="info-value">
+                    {% if prop.get_listing_type_display %}
+                        {{ prop.get_listing_type_display }}
+                    {% else %}
+                        <span class="info-muted">—</span>
+                    {% endif %}
+                </div>
+
+                <div class="info-label">Status</div>
+                <div class="info-value text-capitalize">
+                    {% if prop.status %}
+                        {{ prop.status }}
+                    {% else %}
+                        <span class="info-muted">—</span>
+                    {% endif %}
+                </div>
+
+                <div class="info-label">Size</div>
+                <div class="info-value">
+                    {% if prop.size %}
+                        {{ prop.size }} Biswa
+                    {% else %}
+                        <span class="info-muted">—</span>
+                    {% endif %}
+                </div>
+
+                <div class="info-label">Bedrooms</div>
+                <div class="info-value">
+                    {% if prop.bedrooms %}{{ prop.bedrooms }}{% else %}<span class="info-muted">—</span>{% endif %}
+                </div>
+
+                <div class="info-label">Bathrooms</div>
+                <div class="info-value">
+                    {% if prop.bathrooms %}{{ prop.bathrooms }}{% else %}<span class="info-muted">—</span>{% endif %}
+                </div>
+
+                <div class="info-label">Floor / Total Floors</div>
+                <div class="info-value">
+                    {% if prop.floor_no %}{{ prop.floor_no }}{% else %}—{% endif %}
+                    /
+                    {% if prop.total_floors %}{{ prop.total_floors }}{% else %}—{% endif %}
+                </div>
+
+                <div class="info-label">Parking</div>
+                <div class="info-value">
+                    {% if prop.parking_spaces %}{{ prop.parking_spaces }}{% else %}<span class="info-muted">—</span>{% endif %}
+                </div>
+
+                <div class="info-label">Owner Name</div>
+                <div class="info-value">
+                    {% if prop.owner_name %}{{ prop.owner_name }}{% else %}<span class="info-muted">—</span>{% endif %}
+                </div>
+
+                <div class="info-label">Owner Contact</div>
+                <div class="info-value">
+                    {% if prop.owner_contact %}{{ prop.owner_contact }}{% else %}<span class="info-muted">—</span>{% endif %}
+                </div>
+
+                <div class="info-label">Description / Notes</div>
+                <div class="info-value">
+                    {% if prop.description %}
+                        {{ prop.description }}
+                    {% else %}
+                        <span class="info-muted">—</span>
+                    {% endif %}
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+
+    <!-- CARD 2: TRANSACTIONS -->
+    <div class="card-block">
+        <div class="card-header">
+            <div class="card-title-left">
+                <i class="bi bi-arrow-left-right"></i>
+                <span>Transactions</span>
+            </div>
+            <div class="card-title-right">
+                Activity related to this property
+            </div>
+        </div>
+
+        <div class="card-body" style="padding-top:0;">
+            <div class="table-wrapper">
+                <table class="table-clean">
+                    <thead>
+                        <tr>
+                            <th>Investor</th>
+                            <th>Type</th>
+                            <th>Amount (AFN)</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for t in transactions %}
+                        <tr>
+                            <td style="white-space:nowrap;">
+                                <div style="font-weight:600; font-size:.8rem;">
+                                    {{ t.investor.full_name }}
+                                </div>
+                                <div class="subtext">
+                                    {% if t.investor.phone %}📞 {{ t.investor.phone }}{% endif %}
+                                    {% if t.investor.whatsapp %}
+                                        <br>💬 WhatsApp: {{ t.investor.whatsapp }}
+                                    {% endif %}
+                                </div>
+                            </td>
+
+                            <td style="white-space:nowrap;">
+                                {% if t.transaction_type|lower == 'buy' %}
+                                    <span class="badge-buy">BUY</span>
+                                {% elif t.transaction_type|lower == 'sell' %}
+                                    <span class="badge-sell">SELL</span>
+                                {% else %}
+                                    <span class="badge-buy">{{ t.transaction_type|upper }}</span>
+                                {% endif %}
+                            </td>
+
+                            <td style="white-space:nowrap; font-weight:600;">
+                                {{ t.amount|afn }}
+                            </td>
+
+                            <td style="white-space:nowrap;">
+                                <div style="font-weight:600; font-size:.8rem;">
+                                    {{ t.transaction_date|date:"Y-m-d" }}
+                                </div>
+                                <div class="subtext">
+                                    {{ t.transaction_date|time:"H:i" }}
+                                </div>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr class="table-empty-row">
+                            <td colspan="4">
+                                <i class="bi bi-info-circle"></i>
+                                &nbsp;No transactions recorded for this property.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- CARD 3: COMMISSIONS -->
+    <div class="card-block">
+        <div class="card-header">
+            <div class="card-title-left">
+                <i class="bi bi-cash-coin"></i>
+                <span>Commissions</span>
+            </div>
+            <div class="card-title-right">
+                Total Commission Earned: {{ total_commission_earned|afn }}
+            </div>
+        </div>
+
+        <div class="card-body" style="padding-top:0;">
+            <div class="table-wrapper">
+                <table class="table-clean">
+                    <thead>
+                        <tr>
+                            <th>Deal Type</th>
+                            <th>Rule</th>
+                            <th>Earned (AFN)</th>
+                            <th>Notes</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for c in commissions %}
+                        <tr>
+                            <td style="white-space:nowrap;">
+                                {% if c.deal_type == 'sale' %}
+                                    <span class="badge-sell">SALE</span>
+                                {% elif c.deal_type == 'rent' %}
+                                    <span class="badge-rent">RENT</span>
+                                {% elif c.deal_type == 'mortgage' %}
+                                    <span class="badge-mortgage">MORTGAGE</span>
+                                {% else %}
+                                    <span class="badge-buy">{{ c.deal_type|upper }}</span>
+                                {% endif %}
+                            </td>
+
+                            <td style="white-space:nowrap;">
+                                {% if c.commission_type == 'percent' %}
+                                    <div style="font-weight:600; font-size:.8rem;">
+                                        {{ c.commission_value }}%
+                                    </div>
+                                    <div class="subtext">
+                                        of {{ c.deal_amount|afn }}
+                                    </div>
+                                {% else %}
+                                    <div style="font-weight:600; font-size:.8rem;">
+                                        Fixed
+                                    </div>
+                                    <div class="subtext">
+                                        {{ c.commission_value|afn }}
+                                    </div>
+                                {% endif %}
+                            </td>
+
+                            <td style="white-space:nowrap; font-weight:600;">
+                                {{ c.total_earned|afn }}
+                            </td>
+
+                            <td style="max-width:250px;">
+                                {% if c.notes %}
+                                    <div style="font-size:.8rem; line-height:1.2rem;">
+                                        {{ c.notes }}
+                                    </div>
+                                {% else %}
+                                    <span class="info-muted">—</span>
+                                {% endif %}
+                            </td>
+
+                            <td style="white-space:nowrap;">
+                                <div style="font-weight:600; font-size:.8rem;">
+                                    {{ c.created_at|date:"Y-m-d" }}
+                                </div>
+                                <div class="subtext">
+                                    {{ c.created_at|time:"H:i" }}
+                                </div>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr class="table-empty-row">
+                            <td colspan="5">
+                                <i class="bi bi-info-circle"></i>
+                                &nbsp;No commission recorded for this property.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div> <!-- /page-wrap -->
+
+{% endblock %}

@@ -1,0 +1,219 @@
+{% extends 'dealer/base.html' %}
+{% load widget_tweaks %}
+{% load currency_filters %}
+{% block content %}
+
+<style>
+.card {
+    border: none;
+    border-radius: 1rem;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+    overflow: hidden;
+}
+
+.card-header {
+    background: linear-gradient(90deg, #065f46 0%, #0f766e 100%);
+    color: #fff;
+    border: none;
+    padding: 1rem 1.5rem;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    row-gap: .5rem;
+    align-items: flex-start;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+}
+
+.header-left i {
+    color: #facc15;
+    font-size: 1.3rem;
+}
+
+.header-left-title {
+    font-weight: 600;
+    font-size: 1rem;
+    line-height: 1.2rem;
+}
+
+.header-sub {
+    font-size: .8rem;
+    line-height: 1.1rem;
+    color: rgba(255,255,255,.8);
+}
+
+.btn-back-list {
+    background: #facc15;
+    color: #000;
+    border: none;
+    border-radius: .5rem;
+    font-weight: 600;
+    font-size: .8rem;
+    padding: .4rem .6rem;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+}
+.btn-back-list:hover {
+    background: #eab308;
+    color: #000;
+    text-decoration: none;
+}
+
+.card-body {
+    padding: 1.5rem;
+}
+
+.section-label {
+    font-weight: 600;
+    color: #064e3b;
+    font-size: .9rem;
+    margin-bottom: .25rem;
+}
+
+.form-control,
+.form-select,
+textarea.form-control {
+    border-radius: .6rem;
+    padding: .6rem .8rem;
+    font-size: .9rem;
+}
+
+.form-control:focus,
+.form-select:focus,
+textarea.form-control:focus {
+    border-color: #0d9488;
+    box-shadow: 0 0 0 0.2rem rgba(13,148,136,.25);
+}
+
+.form-hint {
+    font-size: .75rem;
+    color: #6b7280;
+    line-height: 1.2rem;
+    margin-top: .25rem;
+}
+
+.btn-cancel {
+    border-radius: .5rem;
+    padding: .6rem 1rem;
+    font-weight: 500;
+    color: #065f46;
+    border: 1px solid #065f46;
+    background-color: #fff;
+}
+.btn-cancel:hover {
+    background-color: #065f46;
+    color: #fff;
+}
+
+.btn-save {
+    background: linear-gradient(90deg, #065f46 0%, #0f766e 100%);
+    border: none;
+    border-radius: .5rem;
+    padding: .6rem 1rem;
+    font-weight: 600;
+    color: #fff;
+}
+.btn-save:hover {
+    background: linear-gradient(90deg, #0f766e 0%, #065f46 100%);
+    color: #fff;
+}
+
+.row-gap {
+    row-gap: 1rem;
+}
+</style>
+
+<div class="card mb-4">
+
+    <!-- Header -->
+    <div class="card-header">
+        <div class="header-left">
+            <i class="bi bi-arrow-left-right"></i>
+            <div>
+                <div class="header-left-title">
+                    {% if form.instance.id %}
+                        Edit Transaction
+                    {% else %}
+                        Add Transaction
+                    {% endif %}
+                </div>
+                <div class="header-sub">
+                    Record money in / out related to a property
+                </div>
+            </div>
+        </div>
+
+        <a class="btn-back-list" href="{% url 'transaction_list' %}">
+            <i class="bi bi-arrow-left"></i>
+            <span>Back to Transactions</span>
+        </a>
+    </div>
+
+    <!-- Body -->
+    <div class="card-body">
+        <form method="post">
+            {% csrf_token %}
+
+            <div class="row row-gap">
+
+                <!-- Property -->
+                <div class="col-md-6">
+                    <label class="section-label">Property</label>
+                    {% render_field form.property_item class="form-select" %}
+                    <div class="form-hint">Which property this transaction is about</div>
+                </div>
+
+                <!-- Investor -->
+                <div class="col-md-6">
+                    <label class="section-label">Investor</label>
+                    {% render_field form.investor class="form-select" %}
+                    <div class="form-hint">Who paid / who got paid</div>
+                </div>
+
+                <!-- Transaction type -->
+                <div class="col-md-4">
+                    <label class="section-label">Type</label>
+                    {% render_field form.transaction_type class="form-control" placeholder="Buy / Sell" %}
+                    <div class="form-hint">
+                        "Buy" = money spent, "Sell" = money received
+                    </div>
+                </div>
+
+                <!-- Amount (AFN) -->
+                <div class="col-md-4">
+                    <label class="section-label">Amount (AFN)</label>
+                    {% render_field form.amount class="form-control" placeholder="e.g. 2500000" %}
+                    <div class="form-hint">Enter full amount in Afghani</div>
+                </div>
+
+                <!-- Created date (read-only when editing only) -->
+                {% if form.instance.id %}
+                <div class="col-md-4">
+                    <label class="section-label">Recorded On</label>
+                    <input class="form-control" value="{{ form.instance.transaction_date|date:'Y-m-d H:i' }}" disabled>
+                    <div class="form-hint">Saved automatically</div>
+                </div>
+                {% endif %}
+
+            </div>
+
+            <div class="d-flex justify-content-end mt-4">
+                <a href="{% url 'transaction_list' %}" class="btn-cancel me-2">
+                    <i class="bi bi-x-circle"></i> Cancel
+                </a>
+                <button type="submit" class="btn-save">
+                    <i class="bi bi-save"></i>
+                    {% if form.instance.id %}Update{% else %}Save{% endif %} Transaction
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock %}

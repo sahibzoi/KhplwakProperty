@@ -1,0 +1,324 @@
+{% extends 'dealer/base.html' %}
+{% block content %}
+
+<style>
+    .card {
+        border: none;
+        border-radius: 1rem;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        border: 1px solid rgba(0,0,0,0.05);
+        background-color: #fff;
+    }
+
+    .card-header {
+        background: linear-gradient(90deg, #065f46 0%, #0f766e 100%);
+        color: #fff;
+        border-radius: 1rem 1rem 0 0;
+        padding: 1rem 1.5rem;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        row-gap: .75rem;
+        align-items: flex-start;
+    }
+
+    .header-left h5 {
+        font-weight: 600;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: .5rem;
+        font-size: 1.05rem;
+        color: #fff;
+    }
+
+    .header-left h5 i {
+        color: #facc15;
+        font-size: 1.25rem;
+    }
+
+    .header-sub {
+        font-size: .8rem;
+        color: rgba(255,255,255,.8);
+        line-height: 1.2rem;
+    }
+
+    .header-actions .btn-outline-light {
+        border-radius: .5rem;
+        border-width: 1.5px;
+        font-weight: 500;
+        font-size: .8rem;
+        line-height: 1rem;
+        display: inline-flex;
+        align-items: center;
+        gap: .4rem;
+        padding: .5rem .75rem;
+    }
+
+    .summary-box {
+        background-color: #f0fdf4;
+        border: 1px solid #d1fae5;
+        border-radius: 0.75rem;
+        padding: 1rem 1rem 1.1rem;
+        text-align: center;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+        min-height: 110px;
+    }
+
+    .summary-label {
+        font-size: .7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: .05em;
+        color: #065f46;
+        margin-bottom: .4rem;
+    }
+
+    .summary-value-pos {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #065f46;
+        line-height: 1.2rem;
+    }
+
+    .summary-value-neg {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #b91c1c;
+        line-height: 1.2rem;
+    }
+
+    .summary-hint {
+        font-size: .7rem;
+        color: #6b7280;
+        line-height: 1rem;
+        margin-top: .4rem;
+    }
+
+    .section-title {
+        font-size: .8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        color: #6b7280;
+        letter-spacing: .05em;
+        margin-bottom: .75rem;
+        display: flex;
+        align-items: center;
+        gap: .5rem;
+    }
+
+    .section-title i {
+        font-size: .9rem;
+        color: #065f46;
+    }
+
+    .table-card {
+        border: 1px solid #e5e7eb;
+        border-radius: .75rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+        background-color: #fff;
+        overflow: hidden;
+    }
+
+    .table thead th {
+        background-color: #fefce8;
+        color: #064e3b;
+        font-weight: 600;
+        border-bottom: 2px solid #eab308;
+        font-size: .75rem;
+        line-height: 1rem;
+        text-transform: uppercase;
+        vertical-align: middle;
+    }
+
+    .table tbody td {
+        font-size: .85rem;
+        vertical-align: middle;
+    }
+
+    .text-end {
+        text-align: end;
+    }
+
+    .text-muted-small {
+        font-size: .8rem;
+        color: #6b7280;
+        line-height: 1rem;
+    }
+</style>
+
+<div class="card mb-4">
+
+    <!-- HEADER -->
+    <div class="card-header">
+        <div class="header-left">
+            <h5>
+                <i class="bi bi-graph-up-arrow"></i>
+                <span>Finance Report</span>
+            </h5>
+            <div class="header-sub">
+                Overall profitability and cash flow status.
+            </div>
+        </div>
+
+        <div class="header-actions d-flex flex-wrap gap-2">
+            <a href="{% url 'dashboard' %}" class="btn btn-outline-light btn-sm">
+                <i class="bi bi-arrow-left"></i>
+                <span>Back</span>
+            </a>
+            <a href="{% url 'expense_list' %}" class="btn btn-outline-light btn-sm">
+                <i class="bi bi-cash-stack"></i>
+                <span>Expenses</span>
+            </a>
+            <a href="{% url 'income_list' %}" class="btn btn-outline-light btn-sm">
+                <i class="bi bi-wallet2"></i>
+                <span>Income</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- BODY -->
+    <div class="card-body">
+
+        <!-- TOP SUMMARY ROW -->
+        <div class="row g-3 mb-4">
+
+            <div class="col-md-4">
+                <div class="summary-box">
+                    <div class="summary-label">Total Income</div>
+                    <div class="summary-value-pos">
+                        ؋ {{ total_income|floatformat:0 }}
+                    </div>
+                    <div class="summary-hint">
+                        All money in (rent, commission, repayments, etc.)
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="summary-box">
+                    <div class="summary-label">Total Expenses</div>
+                    <div class="summary-value-neg">
+                        ؋ {{ total_expense|floatformat:0 }}
+                    </div>
+                    <div class="summary-hint">
+                        Office costs, repairs, fuel, salaries, etc.
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="summary-box">
+                    <div class="summary-label">Net Balance</div>
+
+                    {% if net_balance >= 0 %}
+                        <div class="summary-value-pos">+؋ {{ net_balance|floatformat:0 }}</div>
+                        <div class="summary-hint">
+                            Profit (income minus expenses)
+                        </div>
+                    {% else %}
+                        <div class="summary-value-neg">؋ {{ net_balance|floatformat:0 }}</div>
+                        <div class="summary-hint">
+                            Loss (more spent than earned)
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+        </div>
+
+        <hr class="my-4">
+
+        <!-- BREAKDOWN TABLES -->
+        <div class="row g-4">
+
+            <!-- EXPENSES BY CATEGORY -->
+            <div class="col-md-6">
+                <div class="section-title">
+                    <i class="bi bi-cash-stack"></i>
+                    <span>Expense Breakdown by Category</span>
+                </div>
+
+                <div class="table-card">
+                    <div class="table-responsive">
+                        <table class="table table-sm mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Category</th>
+                                    <th class="text-end">Total (AFN)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in expense_by_category %}
+                                <tr>
+                                    <td>{{ item.category }}</td>
+                                    <td class="text-end">؋ {{ item.total|floatformat:0 }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="2" class="text-center text-muted py-4">
+                                        <i class="bi bi-info-circle"></i>
+                                        No expense data yet.
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="p-2 text-end text-muted-small border-top">
+                        <a href="{% url 'expense_list' %}" class="text-decoration-none">
+                            View all expenses →
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- INCOME BY SOURCE -->
+            <div class="col-md-6">
+                <div class="section-title">
+                    <i class="bi bi-wallet2"></i>
+                    <span>Income Breakdown by Source</span>
+                </div>
+
+                <div class="table-card">
+                    <div class="table-responsive">
+                        <table class="table table-sm mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Source</th>
+                                    <th class="text-end">Total (AFN)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in income_by_source %}
+                                <tr>
+                                    <td>{{ item.source }}</td>
+                                    <td class="text-end">؋ {{ item.total|floatformat:0 }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="2" class="text-center text-muted py-4">
+                                        <i class="bi bi-info-circle"></i>
+                                        No income data yet.
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="p-2 text-end text-muted-small border-top">
+                        <a href="{% url 'income_list' %}" class="text-decoration-none">
+                            View all income →
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+        </div><!-- /row -->
+    </div><!-- /card-body -->
+
+</div><!-- /card -->
+
+{% endblock %}

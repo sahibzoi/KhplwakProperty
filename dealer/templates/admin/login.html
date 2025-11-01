@@ -1,0 +1,203 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block extrastyle %}
+<style>
+  :root {
+    --kp-dark: #004C45;
+    --kp-light: #04796B;
+    --kp-bg: #f8faf9;
+    --kp-text: #1e293b;
+  }
+
+  body.login {
+    background: var(--kp-bg);
+    font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+    color: var(--kp-text);
+    margin: 0;
+    padding: 0;
+  }
+
+  /* Remove default Django admin header and sidebar */
+  #header, #branding, #user-tools, #nav-sidebar, .breadcrumbs {
+    display: none !important;
+  }
+
+  /* ========================= HEADER BAR ========================= */
+  .kp-header {
+    background: linear-gradient(135deg, var(--kp-dark), var(--kp-light));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 0.7rem 1.5rem;
+    color: #fff;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+    position: relative;
+    z-index: 10;
+  }
+
+  .kp-header img {
+    height: 36px;
+    width: auto;
+    filter: brightness(0) invert(1);
+  }
+
+  .kp-header h1 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin: 0;
+    letter-spacing: 0.3px;
+  }
+
+  /* ========================= LOGIN SECTION ========================= */
+  .kp-login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: calc(100vh - 70px);
+    padding-top: 2vh;
+  }
+
+  .kp-card {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.12);
+    width: 100%;
+    max-width: 420px;
+    padding: 1.8rem 2rem 2rem;
+    text-align: center;
+  }
+
+  .kp-card h2 {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: var(--kp-dark);
+    margin: 0.8rem 0 0.3rem;
+  }
+  .kp-sub {
+    font-size: 0.9rem;
+    color: #64748b;
+    margin: 0 0 1rem;
+  }
+
+  /* ========================= FORM ========================= */
+  form { text-align: left; }
+
+  .kp-field {
+    margin-bottom: 1rem;
+  }
+  .kp-label {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-weight: 700;
+    font-size: 0.92rem;
+    color: var(--kp-text);
+    margin-bottom: 0.4rem;
+  }
+
+  .kp-icon {
+    color: var(--kp-light);
+    width: 18px;
+    height: 18px;
+  }
+
+  .kp-input {
+    width: 100%;
+    border: 1px solid #d1d5db;
+    border-radius: 10px;
+    padding: 0.8rem 0.9rem;
+    font-size: 0.95rem;
+    transition: border 0.2s, box-shadow 0.2s;
+  }
+
+  .kp-input:focus {
+    border-color: var(--kp-light);
+    box-shadow: 0 0 0 3px rgba(4, 121, 107, 0.2);
+    outline: none;
+  }
+
+  .kp-btn {
+    width: 100%;
+    background: linear-gradient(135deg, var(--kp-dark), var(--kp-light));
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 0.9rem;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: filter 0.2s, transform 0.05s;
+  }
+  .kp-btn:hover { filter: brightness(1.06); }
+  .kp-btn:active { transform: scale(0.98); }
+
+  .kp-alert {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #b91c1c;
+    border-radius: 10px;
+    padding: 0.65rem 0.9rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+  }
+
+  @media (max-width: 480px) {
+    .kp-card { padding: 1.2rem 1.4rem; }
+    .kp-header h1 { font-size: 0.95rem; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="kp-header">
+  <img src="{% static 'image/logo.png' %}" alt="Khplwak Property Logo">
+  <h1>Khplwak Property — Admin</h1>
+</div>
+
+<div class="kp-login-container">
+  <div class="kp-card">
+    <h2>{% trans "Admin Sign-in" %}</h2>
+    <p class="kp-sub">{% trans "Access the Khplwak Property Dealer System" %}</p>
+
+    {% if form.errors and not form.non_field_errors %}
+      <div class="kp-alert">{% trans "Please correct the error below." %}</div>
+    {% endif %}
+    {% if form.non_field_errors %}
+      {% for e in form.non_field_errors %}
+        <div class="kp-alert">{{ e }}</div>
+      {% endfor %}
+    {% endif %}
+
+    <form action="{% url 'admin:login' %}" method="post" novalidate>
+      {% csrf_token %}
+      <input type="hidden" name="next" value="{{ next|default:'' }}">
+
+      <div class="kp-field">
+        <label class="kp-label" for="id_username">
+          <svg class="kp-icon" viewBox="0 0 24 24" fill="none">
+            <path d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5Zm0 2c-4 0-8 2-8 5v1h16v-1c0-3-4-5-8-5Z" fill="currentColor"/>
+          </svg>
+          {% trans "Username" %}
+        </label>
+        <input class="kp-input" type="text" name="username" id="id_username" required autofocus autocomplete="username">
+      </div>
+
+      <div class="kp-field">
+        <label class="kp-label" for="id_password">
+          <svg class="kp-icon" viewBox="0 0 24 24" fill="none">
+            <path d="M6 10V8a6 6 0 1 1 12 0v2h1a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-9a1 1 0 0 1 1-1h1Zm2 0h8V8a4 4 0 1 0-8 0v2Z" fill="currentColor"/>
+          </svg>
+          {% trans "Password" %}
+        </label>
+        <input class="kp-input" type="password" name="password" id="id_password" required autocomplete="current-password">
+      </div>
+
+      <button type="submit" class="kp-btn">{% trans "Log in" %}</button>
+    </form>
+  </div>
+</div>
+{% endblock %}
+

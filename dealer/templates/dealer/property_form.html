@@ -1,0 +1,309 @@
+{% extends 'dealer/base.html' %}
+{% load widget_tweaks %}
+{% block title %}{% if form.instance.id %}Edit Property{% else %}Add Property{% endif %}{% endblock %}
+{% block content %}
+
+<style>
+    body {
+        background: radial-gradient(circle at 20% 20%, #f0fdf4 0%, #ffffff 60%);
+    }
+
+    .card {
+        border: none;
+        border-radius: 1rem;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+
+    .card-header {
+        border: none;
+        background: linear-gradient(90deg, #065f46 0%, #0f766e 100%);
+        color: white;
+        border-radius: 1rem 1rem 0 0 !important;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .card-header i {
+        font-size: 1.3rem;
+        opacity: 0.9;
+        color: #facc15;
+    }
+
+    .card-header h5 {
+        font-weight: 600;
+        margin: 0;
+    }
+
+    .section-subtitle {
+        font-size: 0.9rem;
+        opacity: 0.85;
+        margin-top: 0.2rem;
+        color: #fefce8;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: #064e3b;
+    }
+
+    .form-control, .form-select {
+        border-radius: 0.5rem;
+        padding: 0.6rem 0.8rem;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: #0d9488;
+        box-shadow: 0 0 0 0.2rem rgba(13,148,136,0.25);
+    }
+
+    .btn-primary {
+        background: linear-gradient(90deg, #065f46 0%, #0f766e 100%);
+        border: none;
+        border-radius: 0.5rem;
+        padding: 0.6rem 1.2rem;
+        font-weight: 600;
+        color: #fff;
+    }
+
+    .btn-primary:hover {
+        background: linear-gradient(90deg, #0f766e 0%, #065f46 100%);
+    }
+
+    .btn-outline-secondary {
+        border-radius: 0.5rem;
+        padding: 0.6rem 1.2rem;
+        font-weight: 500;
+        color: #065f46;
+        border-color: #065f46;
+    }
+
+    .btn-outline-secondary:hover {
+        background-color: #065f46;
+        color: #fff;
+    }
+
+    .text-gold {
+        color: #facc15;
+    }
+</style>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="fw-bold text-success d-flex align-items-center">
+        <i class="bi bi-building me-2 text-gold"></i>
+        {% if form.instance.id %}
+            Edit Property
+        {% else %}
+            Add New Property
+        {% endif %}
+    </h3>
+    <a href="{% url 'property_list' %}" class="btn btn-outline-secondary btn-sm">
+        <i class="bi bi-arrow-left"></i> Back to List
+    </a>
+</div>
+
+<form method="post">
+    {% csrf_token %}
+
+    <!-- Card 1: Location & Basic Type -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="bi bi-geo-alt-fill"></i>
+            <div>
+                <h5>Location & Type</h5>
+                <p class="section-subtitle mb-0">Basic property identity</p>
+            </div>
+        </div>
+
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Address</label>
+                    {% render_field form.address class="form-control" placeholder="Full address" %}
+                </div>
+
+                <div class="col-md-3 mb-3">
+                    <label class="form-label">City</label>
+                    {% render_field form.city class="form-control" placeholder="City name" %}
+                </div>
+
+                <div class="col-md-3 mb-3">
+                    <label class="form-label">Area / Block</label>
+                    {% render_field form.area_name class="form-control" placeholder="Area / Block" %}
+                </div>
+            </div>
+
+            <div class="row align-items-end">
+                <div class="col-md-4 mb-3">
+                    <label class="form-label d-flex align-items-center">
+                        <i class="bi bi-house-door text-success me-2"></i> Property Type
+                    </label>
+                    {% render_field form.property_type class="form-control" placeholder="House, Apartment, Shop, Land..." %}
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <label class="form-label d-flex align-items-center">
+                        <i class="bi bi-tags-fill text-primary me-2"></i> Listing Type
+                    </label>
+                    {% render_field form.listing_type class="form-select" %}
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <label class="form-label d-flex align-items-center">
+                        <i class="bi bi-toggle-on text-warning me-2"></i> Status
+                    </label>
+                    {% render_field form.status class="form-select" %}
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Land Size (Biswa / Sq. Meter)</label>
+                    {% render_field form.size class="form-control" placeholder="1 Biswa / 100 sqm" %}
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Built Area / Floor Area</label>
+                    {% render_field form.floor_area_sqft class="form-control" placeholder="e.g. 120 sqm covered" %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Card 2: Unit / Building Details -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="bi bi-grid-1x2"></i>
+            <div>
+                <h5>Structure / Layout</h5>
+                <p class="section-subtitle mb-0">Bedrooms, floors, parking etc.</p>
+            </div>
+        </div>
+
+        <div class="card-body">
+            <div class="row">
+
+                <div class="col-md-2 mb-3">
+                    <label class="form-label">Bedrooms</label>
+                    {% render_field form.bedrooms class="form-control" placeholder="3" %}
+                </div>
+
+                <div class="col-md-2 mb-3">
+                    <label class="form-label">Bathrooms</label>
+                    {% render_field form.bathrooms class="form-control" placeholder="2" %}
+                </div>
+
+                <div class="col-md-2 mb-3">
+                    <label class="form-label">Kitchens</label>
+                    {% render_field form.kitchens class="form-control" placeholder="1" %}
+                </div>
+
+                <div class="col-md-3 mb-3">
+                    <label class="form-label">This Unit Floor</label>
+                    {% render_field form.floor_no class="form-control" placeholder="Ground / 1st / 2nd" %}
+                    <div class="form-text text-muted">Which floor this unit is located on</div>
+                </div>
+
+                <div class="col-md-3 mb-3">
+                    <label class="form-label">Total Floors (Building)</label>
+                    {% render_field form.total_floors class="form-control" placeholder="e.g. 4" %}
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Parking Spaces (cars)</label>
+                    {% render_field form.parking_spaces class="form-control" placeholder="1 or 2" %}
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Card 3: Financial / Deal Info -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="bi bi-cash-stack"></i>
+            <div>
+                <h5>Deal Information</h5>
+                <p class="section-subtitle mb-0">Sale, Rent, or Mortgage numbers</p>
+            </div>
+        </div>
+
+        <div class="card-body">
+            <div class="row">
+
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Sale Price (AFN)</label>
+                    {% render_field form.sale_price class="form-control" placeholder="Only if for sale" %}
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Rent / Month (AFN)</label>
+                    {% render_field form.rent_monthly class="form-control" placeholder="Only if for rent" %}
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Deposit / Advance (AFN)</label>
+                    {% render_field form.rent_deposit class="form-control" placeholder="Deposit amount" %}
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Mortgage Amount (AFN)</label>
+                    {% render_field form.mortgage_amount class="form-control" placeholder="If mortgage / grawi" %}
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Mortgage Terms</label>
+                    {% render_field form.mortgage_terms class="form-control" rows="3" placeholder="Terms, return time, witnesses, etc." %}
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Card 4: Owner / Notes -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="bi bi-person-badge"></i>
+            <div>
+                <h5>Owner & Notes</h5>
+                <p class="section-subtitle mb-0">Owner contact and internal notes</p>
+            </div>
+        </div>
+
+        <div class="card-body">
+            <div class="row">
+
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Owner Name</label>
+                    {% render_field form.owner_name class="form-control" placeholder="Owner full name" %}
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Owner Contact</label>
+                    {% render_field form.owner_contact class="form-control" placeholder="Contact number" %}
+                </div>
+
+                <div class="col-md-12 mb-2">
+                    <label class="form-label">Description / Notes</label>
+                    {% render_field form.description class="form-control" rows="3" placeholder="Internal notes or highlights" %}
+                </div>
+
+                <div class="form-text text-muted">1 Biswa = ~100 square meters</div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="d-flex justify-content-end mb-5">
+        <a href="{% url 'property_list' %}" class="btn btn-outline-secondary me-2">
+            <i class="bi bi-x-circle"></i> Cancel
+        </a>
+        <button type="submit" class="btn btn-primary">
+            <i class="bi bi-save"></i> Save Property
+        </button>
+    </div>
+
+</form>
+
+{% endblock %}

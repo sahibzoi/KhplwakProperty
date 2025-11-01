@@ -1,0 +1,251 @@
+{% extends 'dealer/base.html' %}
+{% load currency_filters %}
+{% block content %}
+
+<style>
+.card {
+    border: none;
+    border-radius: 1rem;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+    overflow: hidden;
+}
+
+.card-header {
+    background: linear-gradient(90deg, #065f46 0%, #0f766e 100%);
+    color: #fff;
+    border: none;
+    padding: 1rem 1.5rem;
+}
+
+.header-toprow {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    row-gap: 1rem;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.header-left i {
+    color: #facc15;
+    font-size: 1.3rem;
+}
+
+.table thead th {
+    background-color: #fefce8;
+    color: #064e3b;
+    font-weight: 600;
+    border-bottom: 2px solid #eab308;
+    font-size: .9rem;
+}
+
+.table tbody tr:hover {
+    background-color: #f9fafb;
+    transition: 0.2s ease;
+}
+
+.sub-text {
+    font-size: 0.8rem;
+    color: #6b7280;
+    line-height: 1.2;
+}
+
+.fw-semibold {
+    font-weight: 600;
+    color: #111827;
+}
+
+.money {
+    font-weight: 600;
+    color: #065f46;
+    font-size: .95rem;
+}
+
+.badge-type {
+    font-size: .7rem;
+    font-weight: 600;
+    padding: .35rem .5rem;
+    border-radius: .5rem;
+    line-height: 1.2;
+    display: inline-block;
+    text-transform: uppercase;
+}
+
+.badge-buy {
+    background-color: #dcfce7;
+    color: #065f46;
+}
+.badge-sell {
+    background-color: #fee2e2;
+    color: #7f1d1d;
+}
+
+.btn-icon {
+    border-radius: .5rem;
+    font-size: .8rem;
+    padding: .4rem .55rem;
+    line-height: 1.2;
+}
+
+.btn-outline-primary {
+    border-color: #0d6efd;
+    color: #0d6efd;
+    background: #fff;
+}
+.btn-outline-primary:hover {
+    background: #0d6efd;
+    color: #fff;
+}
+
+.btn-outline-danger {
+    border-color: #dc3545;
+    color: #dc3545;
+    background: #fff;
+}
+.btn-outline-danger:hover {
+    background: #dc3545;
+    color: #fff;
+}
+</style>
+
+<div class="card mb-4">
+    <div class="card-header">
+        <div class="header-toprow">
+            <div class="header-left">
+                <i class="bi bi-arrow-left-right"></i>
+                <span>Transactions</span>
+            </div>
+            <div class="d-flex flex-column align-items-end">
+                <!-- If you later want totals, we can show:
+                <div class="total-box mb-2">Total Volume: {{ total_amount|afn }}</div>
+                -->
+                <a href="{% url 'transaction_create' %}" class="btn-add btn btn-sm text-white" style="background:linear-gradient(90deg,#065f46 0%,#0f766e 100%);border:none;border-radius:.5rem;font-weight:600;">
+                    <i class="bi bi-plus-circle"></i> Add Transaction
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table align-middle mb-0">
+            <thead>
+                <tr>
+                    <th>Property</th>
+                    <th>Investor</th>
+                    <th>Type</th>
+                    <th class="text-end">Amount (AFN)</th>
+                    <th>Date</th>
+                    <th style="width:110px;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for t in transactions %}
+                <tr>
+                    <!-- Property info -->
+                    <td>
+                        <div class="fw-semibold">{{ t.property_item.address }}</div>
+                        <div class="sub-text">
+                            {{ t.property_item.city }}
+                            {% if t.property_item.area_name %}, {{ t.property_item.area_name }}{% endif %}
+                        </div>
+                    </td>
+
+                    <!-- Investor -->
+                    <td>
+                        <div class="fw-semibold">{{ t.investor.name }}</div>
+                        <div class="sub-text">{{ t.investor.contact }}</div>
+                    </td>
+
+                    <!-- Transaction type -->
+                    <td>
+                        {% if t.transaction_type|lower == 'buy' %}
+                            <span class="badge-type badge-buy">Buy</span>
+                        {% elif t.transaction_type|lower == 'sell' %}
+                            <span class="badge-type badge-sell">Sell</span>
+                        {% else %}
+                            <span class="badge-type badge-buy">{{ t.transaction_type }}</span>
+                        {% endif %}
+                    </td>
+
+                    <!-- Amount in AFN -->
+                    <td class="text-end">
+                        <div class="money">{{ t.amount|afn }}</div>
+                    </td>
+
+                    <!-- Timestamp -->
+                    <td>
+                        <div class="fw-semibold">{{ t.transaction_date|date:"Y-m-d" }}</div>
+                        <div class="sub-text">{{ t.transaction_date|time:"H:i" }}</div>
+                    </td>
+
+                    <!-- Actions -->
+                    <td class="text-end" style="white-space:nowrap;">
+
+  <!-- Edit -->
+  <a href="{% url 'transaction_edit' t.id %}" class="btn-table-sm btn-edit mb-1">
+    <i class="bi bi-pencil-square"></i> Edit
+  </a>
+
+  <!-- Delete trigger -->
+  <button type="button"
+          class="btn-table-sm btn-delete mb-1"
+          data-bs-toggle="modal"
+          data-bs-target="#deleteTransactionModal{{ t.id }}">
+    <i class="bi bi-trash"></i> Delete
+  </button>
+
+  <!-- Modal -->
+  <div class="modal fade" id="deleteTransactionModal{{ t.id }}" tabindex="-1"
+       aria-labelledby="deleteTransactionLabel{{ t.id }}" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow-sm rounded-3">
+        <div class="modal-header text-white rounded-top"
+             style="background:linear-gradient(90deg,#065f46,#0f766e);">
+          <h6 class="modal-title d-flex align-items-center gap-2" id="deleteTransactionLabel{{ t.id }}">
+            <i class="bi bi-exclamation-triangle"></i>
+            Delete Transaction
+          </h6>
+          <button type="button" class="btn-close btn-close-white"
+                  data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+
+        <div class="modal-body">
+          <p class="mb-2">Are you sure you want to delete this transaction?</p>
+          <p class="small text-muted mb-0">
+            <i class="bi bi-arrow-left-right me-1"></i>
+            {{ t.transaction_type|upper }} —
+            {{ t.amount }} AFN
+            {% if t.property_item %}
+              for <strong>{{ t.property_item.address }}</strong>
+            {% endif %}
+          </p>
+        </div>
+
+        <div class="modal-footer border-0">
+          <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <form action="{% url 'transaction_delete' t.id %}" method="post" class="d-inline">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-sm btn-danger">
+              <i class="bi bi-trash"></i> Delete
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</td>
+
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}

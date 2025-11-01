@@ -1,0 +1,241 @@
+{% extends 'dealer/base.html' %}
+{% load widget_tweaks %}
+{% block content %}
+
+<style>
+    body {
+        background: radial-gradient(circle at 20% 20%, #f0fdf4 0%, #ffffff 60%);
+    }
+
+    .card {
+        border: none;
+        border-radius: 1rem;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+
+    .card-header {
+        border: none;
+        background: linear-gradient(90deg, #065f46 0%, #0f766e 100%);
+        color: white;
+        border-radius: 1rem 1rem 0 0 !important;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .card-header i {
+        font-size: 1.3rem;
+        opacity: 0.9;
+        color: #facc15;
+    }
+
+    .card-header h5 {
+        font-weight: 600;
+        margin: 0;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: #064e3b;
+    }
+
+    .form-control,
+    .form-select {
+        border-radius: 0.5rem;
+        padding: 0.6rem 0.8rem;
+    }
+
+    .form-control.is-invalid,
+    .form-select.is-invalid {
+        border-color: #dc2626;
+        box-shadow: 0 0 0 0.2rem rgba(220,38,38,.15);
+    }
+
+    .invalid-feedback {
+        font-size: 0.8rem;
+        color: #dc2626;
+        font-weight: 500;
+        margin-top: 0.35rem;
+    }
+
+    .btn-primary {
+        background: linear-gradient(90deg, #065f46 0%, #0f766e 100%);
+        border: none;
+        border-radius: 0.5rem;
+        padding: 0.6rem 1.2rem;
+        font-weight: 600;
+        color: #fff;
+    }
+
+    .btn-outline-secondary {
+        border-radius: 0.5rem;
+        padding: 0.6rem 1.2rem;
+        font-weight: 500;
+        color: #065f46;
+        border-color: #065f46;
+    }
+
+    .btn-outline-secondary:hover {
+        background-color: #065f46;
+        color: #fff;
+    }
+
+    .text-gold {
+        color: #facc15;
+    }
+</style>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="fw-bold text-success d-flex align-items-center">
+        <i class="bi bi-person-badge-fill me-2 text-gold"></i>
+        {% if form.instance.id %}
+            Edit Investor
+        {% else %}
+            Add New Investor
+        {% endif %}
+    </h3>
+
+    <a href="{% url 'investor_list' %}" class="btn btn-outline-secondary btn-sm">
+        <i class="bi bi-arrow-left"></i> Back to List
+    </a>
+</div>
+
+<form method="post" novalidate>
+    {% csrf_token %}
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="bi bi-person-lines-fill"></i>
+            <div>
+                <h5>Investor Info</h5>
+                <p class="section-subtitle mb-0">Basic profile and capital details</p>
+            </div>
+        </div>
+
+        <div class="card-body">
+            <div class="row">
+
+                <!-- Full Name -->
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Full Name</label>
+                    {% if form.full_name.errors %}
+                        {% render_field form.full_name class="form-control is-invalid" placeholder="Investor full name" %}
+                        <div class="invalid-feedback">{{ form.full_name.errors.0 }}</div>
+                    {% else %}
+                        {% render_field form.full_name class="form-control" placeholder="Investor full name" %}
+                    {% endif %}
+                </div>
+
+                <!-- Surname -->
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Surname</label>
+                    {% if form.surname.errors %}
+                        {% render_field form.surname class="form-control is-invalid" placeholder="Family name" %}
+                        <div class="invalid-feedback">{{ form.surname.errors.0 }}</div>
+                    {% else %}
+                        {% render_field form.surname class="form-control" placeholder="Family name" %}
+                    {% endif %}
+                </div>
+
+                <!-- Location -->
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Location</label>
+                    {% if form.location.errors %}
+                        {% render_field form.location class="form-control is-invalid" placeholder="City / Province" %}
+                        <div class="invalid-feedback">{{ form.location.errors.0 }}</div>
+                    {% else %}
+                        {% render_field form.location class="form-control" placeholder="City / Province" %}
+                    {% endif %}
+                </div>
+
+                <!-- Phone -->
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Phone (Afghanistan)</label>
+                    {% if form.phone.errors %}
+                        {% render_field form.phone class="form-control is-invalid" placeholder="+93..." %}
+                        <div class="invalid-feedback">{{ form.phone.errors.0 }}</div>
+                    {% else %}
+                        {% render_field form.phone class="form-control" placeholder="+93..." %}
+                    {% endif %}
+                    <small class="text-muted d-block mt-1">Example: +93700123456 or 0700123456</small>
+                </div>
+
+                <!-- WhatsApp -->
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">WhatsApp</label>
+                    {% if form.whatsapp.errors %}
+                        {% render_field form.whatsapp class="form-control is-invalid" placeholder="+93..." %}
+                        <div class="invalid-feedback">{{ form.whatsapp.errors.0 }}</div>
+                    {% else %}
+                        {% render_field form.whatsapp class="form-control" placeholder="+93..." %}
+                    {% endif %}
+                </div>
+
+                <!-- Invested Amount -->
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Invested Amount (AFN)</label>
+                    {% if form.invested_amount.errors %}
+                        {% render_field form.invested_amount class="form-control is-invalid" placeholder="0.00" %}
+                        <div class="invalid-feedback">{{ form.invested_amount.errors.0 }}</div>
+                    {% else %}
+                        {% render_field form.invested_amount class="form-control" placeholder="0.00" %}
+                    {% endif %}
+                </div>
+
+                <!-- Investor Type -->
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Investor Type</label>
+                    {% if form.investor_type.errors %}
+                        {% render_field form.investor_type class="form-select is-invalid" %}
+                        <div class="invalid-feedback">{{ form.investor_type.errors.0 }}</div>
+                    {% else %}
+                        {% render_field form.investor_type class="form-select" %}
+                    {% endif %}
+                </div>
+
+                <!-- Status -->
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Status</label>
+                    {% if form.status.errors %}
+                        {% render_field form.status class="form-select is-invalid" %}
+                        <div class="invalid-feedback">{{ form.status.errors.0 }}</div>
+                    {% else %}
+                        {% render_field form.status class="form-select" %}
+                    {% endif %}
+                </div>
+
+                <!-- ID Document -->
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">ID Document</label>
+                    {% if form.id_document.errors %}
+                        {% render_field form.id_document class="form-control is-invalid" placeholder="Passport / Tazkira / etc." %}
+                        <div class="invalid-feedback">{{ form.id_document.errors.0 }}</div>
+                    {% else %}
+                        {% render_field form.id_document class="form-control" placeholder="Passport / Tazkira / etc." %}
+                    {% endif %}
+                </div>
+
+                <!-- Notes -->
+                <div class="col-md-12 mb-3">
+                    <label class="form-label">Notes</label>
+                    {% if form.notes.errors %}
+                        {% render_field form.notes class="form-control is-invalid" rows="2" placeholder="Internal notes (not shown to client)" %}
+                        <div class="invalid-feedback">{{ form.notes.errors.0 }}</div>
+                    {% else %}
+                        {% render_field form.notes class="form-control" rows="2" placeholder="Internal notes (not shown to client)" %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-end mb-5">
+        <a href="{% url 'investor_list' %}" class="btn btn-outline-secondary me-2">
+            <i class="bi bi-x-circle"></i> Cancel
+        </a>
+        <button type="submit" class="btn btn-primary">
+            <i class="bi bi-save"></i> Save Investor
+        </button>
+    </div>
+</form>
+
+{% endblock %}

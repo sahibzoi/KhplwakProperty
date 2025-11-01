@@ -1,0 +1,452 @@
+{% extends 'dealer/base.html' %}
+{% load currency_filters %}
+{% block title %}Expenses | Khplwak Property{% endblock %}
+
+{% block content %}
+
+<style>
+    /* Outer card shell */
+    .list-shell {
+        border-radius: 1rem;
+        background: #ffffff;
+        box-shadow: 0 12px 30px rgba(0,0,0,0.06);
+        border: 1px solid rgba(0,0,0,0.05);
+        overflow: hidden;
+    }
+
+    /* Header */
+    .list-head {
+        background: linear-gradient(90deg,#065f46 0%,#0f766e 100%);
+        color: #fff;
+        padding: 1rem 1.25rem;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: flex-start;
+        row-gap: .75rem;
+    }
+
+    .list-head-left {
+        display: flex;
+        flex-direction: column;
+        gap: .25rem;
+    }
+
+    .list-head-title {
+        font-weight: 600;
+        font-size: 1rem;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        gap: .5rem;
+    }
+
+    .list-head-title i {
+        color: #facc15;
+        font-size: 1.2rem;
+    }
+
+    .list-head-sub {
+        font-size: .8rem;
+        color: rgba(255,255,255,.8);
+        line-height: 1.1rem;
+    }
+
+    .list-head-right {
+        display: flex;
+        flex-wrap: wrap;
+        gap: .5rem .75rem;
+        align-items: flex-start;
+        justify-content: flex-end;
+    }
+
+    .total-chip {
+        background: #fffbea;
+        border: 1px solid #eab30866;
+        border-radius: .6rem;
+        padding: .6rem .8rem;
+        min-width: 180px;
+        font-size: .8rem;
+        line-height: 1.2rem;
+        font-weight: 500;
+        color: #92400e;
+    }
+
+    .total-chip-label {
+        font-size: .7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: .03em;
+        color: #92400e;
+        margin-bottom: .25rem;
+    }
+
+    .total-chip-value {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #92400e;
+    }
+
+    .btn-add-expense {
+        background: #facc15;
+        color: #000;
+        border: none;
+        border-radius: .6rem;
+        font-weight: 600;
+        font-size: .8rem;
+        padding: .6rem .9rem;
+        line-height: 1rem;
+        display: inline-flex;
+        align-items: center;
+        gap: .4rem;
+        text-decoration: none;
+    }
+    .btn-add-expense:hover {
+        background: #eab308;
+        color: #000;
+        text-decoration: none;
+    }
+
+    .btn-back {
+        background: rgba(255,255,255,0.12);
+        border: 1px solid rgba(255,255,255,0.4);
+        border-radius: .6rem;
+        font-weight: 600;
+        font-size: .8rem;
+        padding: .6rem .9rem;
+        line-height: 1rem;
+        color: #fff;
+        display: inline-flex;
+        align-items: center;
+        gap: .4rem;
+        text-decoration: none;
+    }
+    .btn-back:hover {
+        background: rgba(255,255,255,0.18);
+        color: #fff;
+        text-decoration: none;
+    }
+
+    /* Body */
+    .list-body {
+        padding: 1rem 1.25rem 1.25rem;
+    }
+
+    /* Table */
+    .table thead th {
+        background-color: #fefce8;
+        color: #064e3b;
+        font-weight: 600;
+        border-bottom: 2px solid #eab308;
+        font-size: .8rem;
+        vertical-align: middle;
+        white-space: nowrap;
+    }
+
+    .table tbody td {
+        font-size: .85rem;
+        vertical-align: middle;
+    }
+
+    .table tbody tr:hover {
+        background-color: #f9fafb;
+        transition: .15s ease;
+    }
+
+    .expense-amount {
+        font-weight: 600;
+        color: #991b1b;
+        white-space: nowrap;
+        font-size: .9rem;
+    }
+
+    .cat-pill {
+        display: inline-block;
+        background-color: #ecfdf5;
+        border: 1px solid #065f46;
+        color: #065f46;
+        font-size: .7rem;
+        font-weight: 600;
+        border-radius: .5rem;
+        padding: .3rem .5rem;
+        white-space: nowrap;
+        line-height: 1rem;
+    }
+
+    .prop-line {
+        font-size: .8rem;
+        color: #6b7280;
+        line-height: 1.1rem;
+    }
+
+    .empty-row {
+        color: #6b7280;
+        font-size: .9rem;
+        text-align: center;
+        padding: 2rem 1rem;
+    }
+
+    /* Action buttons */
+    .btn-table-sm {
+        font-size: .75rem;
+        line-height: 1rem;
+        font-weight: 600;
+        border-radius: .5rem;
+        padding: .35rem .6rem;
+        display: inline-flex;
+        align-items: center;
+        gap: .35rem;
+        border: 1px solid transparent;
+        text-decoration: none;
+    }
+
+    .btn-edit {
+        background-color: #eff6ff;
+        color: #1e40af;
+        border: 1px solid #1e40af;
+    }
+    .btn-edit:hover {
+        background-color: #1e40af;
+        color: #fff;
+        text-decoration: none;
+    }
+
+    .btn-delete {
+        background-color: #fef2f2;
+        color: #991b1b;
+        border: 1px solid #991b1b;
+    }
+    .btn-delete:hover {
+        background-color: #991b1b;
+        color: #fff;
+        text-decoration: none;
+    }
+
+    /* modal header */
+    .modal-header.gradient-header {
+        background: linear-gradient(90deg,#065f46,#0f766e);
+        color: #fff;
+    }
+    .modal-header .bi-exclamation-triangle {
+        color:#facc15;
+    }
+    .btn-close-white {
+        filter: invert(1);
+    }
+</style>
+
+<div class="list-shell mb-4">
+
+    <!-- HEADER -->
+    <div class="list-head">
+        <div class="list-head-left">
+            <div class="list-head-title">
+                <i class="bi bi-cash-stack"></i>
+                <span>Expenses</span>
+            </div>
+            <div class="list-head-sub">
+                Track money going out (renovation, travel, paperwork, etc.)
+            </div>
+        </div>
+
+        <div class="list-head-right">
+
+            <div class="total-chip">
+                <div class="total-chip-label">Total Spent</div>
+                <div class="total-chip-value">
+                    {{ total_expense|afn }}
+                </div>
+            </div>
+
+            <a href="{% url 'expense_create' %}" class="btn-add-expense">
+                <i class="bi bi-plus-circle"></i>
+                <span>Add Expense</span>
+            </a>
+
+            <a href="{% url 'dashboard' %}" class="btn-back">
+                <i class="bi bi-arrow-left"></i>
+                <span>Back</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- BODY / TABLE -->
+    <div class="list-body">
+        <div class="table-responsive">
+            <table class="table align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Category</th>
+                        <th>Description</th>
+                        <th>Property</th>
+                        <th class="text-end">Amount (؋)</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for e in expenses %}
+                    <tr>
+                        <!-- Date -->
+                        <td style="white-space:nowrap;">
+                            <div class="fw-semibold" style="font-size:.85rem;">
+                                {{ e.date|date:"Y-m-d" }}
+                            </div>
+                            <div class="text-muted" style="font-size:.7rem;">
+                                {{ e.date|date:"l" }}
+                            </div>
+                        </td>
+
+                        <!-- Category -->
+                        <td style="white-space:nowrap;">
+                            <span class="cat-pill">
+                                {{ e.category }}
+                            </span>
+                        </td>
+
+                        <!-- Description + remarks -->
+                        <td style="min-width:200px;">
+                            <div class="fw-semibold" style="font-size:.85rem;">
+                                {{ e.description|default:"—" }}
+                            </div>
+                            {% if e.remarks %}
+                            <div class="text-muted" style="font-size:.7rem;line-height:1rem;">
+                                {{ e.remarks }}
+                            </div>
+                            {% endif %}
+                        </td>
+
+                        <!-- Related Property -->
+                        <td style="min-width:180px;">
+                            {% if e.property_item %}
+                                <div class="fw-semibold" style="font-size:.85rem;">
+                                    {{ e.property_item.address }}
+                                </div>
+                                <div class="prop-line">
+                                    {{ e.property_item.city }}
+                                    {% if e.property_item.area_name %}
+                                        , {{ e.property_item.area_name }}
+                                    {% endif %}
+                                </div>
+                            {% else %}
+                                <span class="text-muted">—</span>
+                            {% endif %}
+                        </td>
+
+                        <!-- Amount -->
+                        <td class="text-end">
+                            <div class="expense-amount">
+                                {{ e.amount|afn }}
+                            </div>
+                        </td>
+
+                        <!-- Actions -->
+                        <td class="text-end" style="white-space:nowrap;">
+                            <!-- Edit -->
+                            <a href="{% url 'expense_edit' e.id %}"
+                               class="btn-table-sm btn-edit mb-1"
+                               title="Edit">
+                                <i class="bi bi-pencil-square"></i>
+                                <span>Edit</span>
+                            </a>
+
+                            <!-- Delete trigger (opens modal) -->
+                            <button type="button"
+                                    class="btn-table-sm btn-delete mb-1"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#deleteExpenseModal{{ e.id }}">
+                                <i class="bi bi-trash"></i>
+                                <span>Delete</span>
+                            </button>
+
+                            <!-- Delete Modal -->
+                            <div class="modal fade"
+                                 id="deleteExpenseModal{{ e.id }}"
+                                 tabindex="-1"
+                                 aria-labelledby="deleteExpenseLabel{{ e.id }}"
+                                 aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered">
+                                    <div class="modal-content border-0 shadow-sm rounded-3">
+
+                                        <div class="modal-header gradient-header text-white rounded-top">
+                                            <h6 class="modal-title d-flex align-items-center gap-2"
+                                                id="deleteExpenseLabel{{ e.id }}">
+                                                <i class="bi bi-exclamation-triangle"></i>
+                                                Delete Expense
+                                            </h6>
+                                            <button type="button"
+                                                    class="btn-close btn-close-white"
+                                                    data-bs-dismiss="modal"
+                                                    aria-label="Close"></button>
+                                        </div>
+
+                                        <div class="modal-body">
+                                            <p class="mb-2">
+                                                Are you sure you want to delete this expense?
+                                            </p>
+
+                                            <p class="small text-muted mb-0">
+                                                <strong>{{ e.category }}</strong>
+                                                — {{ e.description|default:"(no description)" }},
+                                                <strong>{{ e.amount|afn }}</strong>
+                                                <br>
+                                                <span class="text-muted">
+                                                    {{ e.date|date:"Y-m-d" }}
+                                                </span>
+                                            </p>
+                                        </div>
+
+                                        <div class="modal-footer border-0">
+                                            <button type="button"
+                                                    class="btn btn-sm btn-secondary"
+                                                    data-bs-dismiss="modal">
+                                                Cancel
+                                            </button>
+
+                                            <form action="{% url 'expense_delete' e.id %}"
+                                                  method="post"
+                                                  class="d-inline">
+                                                {% csrf_token %}
+                                                <button type="submit"
+                                                        class="btn btn-sm btn-danger">
+                                                    <i class="bi bi-trash"></i>
+                                                    Delete
+                                                </button>
+                                            </form>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="empty-row">
+                            <i class="bi bi-info-circle"></i>
+                            No expenses recorded yet.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+
+                {% if expenses %}
+                <tfoot>
+                    <tr>
+                        <td colspan="4" class="text-end fw-semibold" style="color:#4b5563;">
+                            Total:
+                        </td>
+                        <td class="text-end fw-bold" style="color:#92400e;">
+                            {{ total_expense|afn }}
+                        </td>
+                        <td></td>
+                    </tr>
+                </tfoot>
+                {% endif %}
+            </table>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

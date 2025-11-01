@@ -1,0 +1,528 @@
+{% extends 'dealer/base.html' %}
+{% load currency_filters %}
+{% block content %}
+
+<style>
+    .card {
+        border: none;
+        border-radius: 1rem;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.07);
+        overflow: hidden;
+        border: 1px solid rgba(0,0,0,0.04);
+        background-color: #fff;
+    }
+
+    /* HEADER */
+    .card-header {
+        background: radial-gradient(circle at 0% 0%, #065f46 0%, #0f766e 60%);
+        color: #fff;
+        border: none;
+        padding: 1rem 1.25rem 1.25rem;
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        row-gap: 1rem;
+    }
+
+    .header-left {
+        display: flex;
+        gap: .75rem;
+        min-width: 220px;
+    }
+
+    .avatar-badge {
+        background: rgba(0,0,0,.15);
+        width: 48px;
+        height: 48px;
+        min-width: 48px;
+        border-radius: .75rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.3rem;
+        color: #facc15;
+        box-shadow: 0 4px 10px rgba(0,0,0,.3);
+    }
+
+    .header-mainline {
+        font-weight: 600;
+        margin: 0;
+        font-size: 1rem;
+        color: #fff;
+        line-height: 1.3rem;
+    }
+
+    .subline {
+        color: rgba(255,255,255,.8);
+        font-size: .8rem;
+        line-height: 1.1rem;
+        margin-top: .2rem;
+    }
+
+    .subline span.label-pill {
+        display: inline-block;
+        background: rgba(0,0,0,.25);
+        border: 1px solid rgba(255,255,255,.2);
+        border-radius: .5rem;
+        padding: .15rem .5rem;
+        font-size: .7rem;
+        font-weight: 600;
+        line-height: 1rem;
+        color: #fff;
+        text-transform: uppercase;
+        margin-right: .4rem;
+    }
+
+    .header-right {
+        text-align: right;
+        min-width: 200px;
+    }
+
+    .stat-label {
+        font-size: .7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: .04em;
+        color: rgba(255,255,255,.7);
+        margin-bottom: .15rem;
+    }
+
+    .money-in {
+        font-weight: 600;
+        font-size: 1rem;
+        color: #dcfce7; /* light green */
+        line-height: 1.2rem;
+    }
+
+    .money-out {
+        font-weight: 600;
+        font-size: 1rem;
+        color: #ffe4e6; /* light red/pink */
+        line-height: 1.2rem;
+    }
+
+    .net-profit {
+        font-weight: 600;
+        font-size: 1rem;
+        line-height: 1.2rem;
+    }
+    .net-profit.pos { color: #bbf7d0; }  /* soft green */
+    .net-profit.neg { color: #fecaca; }  /* soft red   */
+
+    /* BODY SECTIONS */
+    .block {
+        padding: 1rem 1.25rem;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .block-title-row {
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        row-gap: .5rem;
+        margin-bottom: .75rem;
+    }
+
+    .block-title-left {
+        font-size: .8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        color: #6b7280;
+        letter-spacing: .05em;
+        display: flex;
+        align-items: center;
+        gap: .5rem;
+    }
+
+    .block-title-left i {
+        color: #065f46;
+        font-size: 1rem;
+    }
+
+    .block-hint {
+        font-size: .75rem;
+        color: #6b7280;
+        line-height: 1rem;
+    }
+
+    /* PROFILE GRID */
+    .text-label {
+        font-size: .7rem;
+        color: #6b7280;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: .03em;
+        margin-bottom: .25rem;
+    }
+
+    .text-value {
+        font-size: .9rem;
+        font-weight: 500;
+        color: #111827;
+        line-height: 1.3rem;
+        word-break: break-word;
+    }
+
+    .money-big {
+        font-weight: 600;
+        font-size: .95rem;
+        color: #065f46;
+        line-height: 1.3rem;
+    }
+
+    .muted-note {
+        font-size: .7rem;
+        color: #6b7280;
+        line-height: 1rem;
+    }
+
+    /* TABLE */
+    .transactions-table thead th {
+        background-color: #fefce8;
+        color: #064e3b;
+        font-weight: 600;
+        border-bottom: 2px solid #eab308;
+        font-size: .8rem;
+        vertical-align: middle;
+        white-space: nowrap;
+    }
+
+    .transactions-table tbody td {
+        font-size: .8rem;
+        vertical-align: middle;
+    }
+
+    .property-main {
+        font-weight: 600;
+        font-size: .8rem;
+        color: #111827;
+        line-height: 1.2rem;
+    }
+
+    .property-subline {
+        font-size: .7rem;
+        color: #6b7280;
+        line-height: 1rem;
+    }
+
+    .date-main {
+        font-weight: 600;
+        font-size: .8rem;
+        color: #111827;
+        line-height: 1.2rem;
+    }
+
+    .date-sub {
+        font-size: .7rem;
+        color: #6b7280;
+        line-height: 1rem;
+    }
+
+    .type-pill {
+        display: inline-block;
+        font-size: .7rem;
+        line-height: 1rem;
+        font-weight: 600;
+        border-radius: .5rem;
+        padding: .3rem .5rem;
+        text-transform: uppercase;
+        white-space: nowrap;
+    }
+    .type-buy {
+        background-color: #dcfce7;
+        color: #065f46;
+    }
+    .type-sell {
+        background-color: #fee2e2;
+        color: #7f1d1d;
+    }
+    .type-other {
+        background-color: #e0f2fe;
+        color: #075985;
+    }
+
+    .amt-cell {
+        font-weight: 600;
+        font-size: .8rem;
+        color: #111827;
+        white-space: nowrap;
+    }
+
+    /* FOOTER BUTTONS */
+    .footer-actions {
+        background-color: #f9fafb;
+        padding: 1rem 1.25rem;
+        display: flex;
+        justify-content: flex-end;
+        gap: .5rem;
+        flex-wrap: wrap;
+    }
+
+    .btn-outline-secondary {
+        border-radius: .5rem;
+        font-weight: 500;
+        color: #065f46;
+        border-color: #065f46;
+    }
+    .btn-outline-secondary:hover {
+        background-color: #065f46;
+        color: #fff;
+    }
+
+    .btn-primary {
+        background: linear-gradient(90deg, #065f46 0%, #0f766e 100%);
+        border: none;
+        border-radius: .5rem;
+        font-weight: 600;
+        color: #fff;
+    }
+    .btn-primary:hover {
+        background: linear-gradient(90deg, #0f766e 0%, #065f46 100%);
+    }
+
+</style>
+
+
+<div class="card mb-4">
+
+    <!-- ================= HEADER ================= -->
+    <div class="card-header">
+
+        <!-- LEFT SIDE: WHO IS THIS PERSON -->
+        <div class="header-left">
+            <div class="avatar-badge">
+                <i class="bi bi-person-badge-fill"></i>
+            </div>
+            <div>
+                <div class="header-mainline">
+                    {{ investor.full_name }}
+                    {% if investor.surname %} {{ investor.surname }}{% endif %}
+                </div>
+
+                <div class="subline">
+                    {% if investor.investor_type %}
+                        <span class="label-pill">{{ investor.investor_type }}</span>
+                    {% endif %}
+                    {% if investor.status %}
+                        <span class="label-pill">{{ investor.status }}</span>
+                    {% endif %}
+                </div>
+
+                <div class="subline">
+                    {{ investor.phone }}
+                    {% if investor.whatsapp %} • WhatsApp: {{ investor.whatsapp }}{% endif %}
+                </div>
+
+                <div class="subline">
+                    {% if investor.location %}{{ investor.location }}{% endif %}
+                    • ID #{{ investor.id }}
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT SIDE: MONEY SUMMARY -->
+        <div class="header-right">
+            <div class="stat-label">Capital Put In</div>
+            <div class="money-in">؋ {{ total_invested|floatformat:0 }}</div>
+
+            <div class="stat-label mt-3">Money Returned</div>
+            <div class="money-out">؋ {{ total_returned|floatformat:0 }}</div>
+
+            <div class="stat-label mt-3">Net Result</div>
+            {% if net_result >= 0 %}
+                <div class="net-profit pos">+؋ {{ net_result|floatformat:0 }}</div>
+            {% else %}
+                <div class="net-profit neg">؋ {{ net_result|floatformat:0 }}</div>
+            {% endif %}
+        </div>
+    </div>
+
+
+    <!-- ================= PROFILE BLOCK ================= -->
+    <div class="block">
+        <div class="block-title-row">
+            <div class="block-title-left">
+                <i class="bi bi-person-lines-fill"></i>
+                <span>Investor Profile</span>
+            </div>
+            <div class="block-hint">
+                Basic identity, trust info, and recorded capital.
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Name -->
+            <div class="col-md-4 mb-3">
+                <div class="text-label">Full Name</div>
+                <div class="text-value">
+                    {{ investor.full_name }}
+                    {% if investor.surname %} {{ investor.surname }}{% endif %}
+                </div>
+            </div>
+
+            <!-- Location -->
+            <div class="col-md-4 mb-3">
+                <div class="text-label">Location</div>
+                <div class="text-value">
+                    {% if investor.location %}
+                        {{ investor.location }}
+                    {% else %}
+                        <span class="text-muted">—</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Status -->
+            <div class="col-md-4 mb-3">
+                <div class="text-label">Relationship Status</div>
+                <div class="text-value">
+                    {% if investor.status %}
+                        {{ investor.status|title }}
+                    {% else %}
+                        <span class="text-muted">—</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Phone -->
+            <div class="col-md-4 mb-3">
+                <div class="text-label">Phone</div>
+                <div class="text-value">{{ investor.phone }}</div>
+                {% if investor.whatsapp %}
+                <div class="muted-note">WhatsApp: {{ investor.whatsapp }}</div>
+                {% endif %}
+            </div>
+
+            <!-- ID / Tazkira -->
+            <div class="col-md-4 mb-3">
+                <div class="text-label">ID / Tazkira</div>
+                <div class="text-value">
+                    {% if investor.id_document %}
+                        {{ investor.id_document }}
+                    {% else %}
+                        <span class="text-muted">—</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Recorded Capital -->
+            <div class="col-md-4 mb-3">
+                <div class="text-label">Recorded Capital (؋)</div>
+                <div class="money-big">
+                    ؋ {{ investor.invested_amount|floatformat:0 }}
+                </div>
+                <div class="muted-note">
+                    How much of THEIR money is still in deals with you.
+                </div>
+            </div>
+        </div>
+
+        {% if investor.notes %}
+        <div class="row">
+            <div class="col-md-12 mb-2">
+                <div class="text-label">Internal Notes</div>
+                <div class="text-value" style="white-space:pre-line;">
+                    {{ investor.notes }}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+
+    <!-- ================= TRANSACTIONS BLOCK ================= -->
+    <div class="block">
+        <div class="block-title-row">
+            <div class="block-title-left">
+                <i class="bi bi-arrow-left-right"></i>
+                <span>Transactions</span>
+            </div>
+            <div class="block-hint">
+                Where this investor’s money moved in / out.
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table transactions-table align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Property</th>
+                        <th>Type</th>
+                        <th class="text-end">Amount (؋)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for t in transactions %}
+                    <tr>
+                        <!-- DATE -->
+                        <td style="white-space:nowrap;">
+                            <div class="date-main">
+                                {{ t.transaction_date|date:"Y-m-d" }}
+                            </div>
+                            <div class="date-sub">
+                                {{ t.transaction_date|time:"H:i" }}
+                            </div>
+                        </td>
+
+                        <!-- PROPERTY -->
+                        <td style="min-width:200px;">
+                            {% if t.property_item %}
+                                <div class="property-main">
+                                    {{ t.property_item.address }}
+                                </div>
+                                <div class="property-subline">
+                                    {{ t.property_item.city }}
+                                    {% if t.property_item.area_name %}, {{ t.property_item.area_name }}{% endif %}
+                                </div>
+                            {% else %}
+                                <span class="text-muted">—</span>
+                            {% endif %}
+                        </td>
+
+                        <!-- TYPE -->
+                        <td style="white-space:nowrap;">
+                            {% if t.transaction_type|lower == 'buy' %}
+                                <span class="type-pill type-buy">BUY</span>
+                            {% elif t.transaction_type|lower == 'sell' %}
+                                <span class="type-pill type-sell">SELL</span>
+                            {% else %}
+                                <span class="type-pill type-other">{{ t.transaction_type|upper }}</span>
+                            {% endif %}
+                        </td>
+
+                        <!-- AMOUNT -->
+                        <td class="text-end amt-cell">
+                            ؋ {{ t.amount|floatformat:0 }}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center text-muted py-4">
+                            <i class="bi bi-exclamation-circle"></i>
+                            No transactions recorded.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+    <!-- ================= FOOTER BUTTONS ================= -->
+    <div class="footer-actions">
+        <a href="{% url 'investor_list' %}" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-arrow-left"></i> Back
+        </a>
+
+        <a href="{% url 'investor_edit' investor.id %}" class="btn btn-primary btn-sm">
+            <i class="bi bi-pencil-square"></i> Edit
+        </a>
+    </div>
+
+</div>
+
+{% endblock %}

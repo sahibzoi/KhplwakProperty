@@ -1,0 +1,14 @@
+{% extends 'dealer/base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Delete Transaction</h2>
+    <p>Are you sure you want to delete transaction: <strong>{{ transaction.property_item.address }} - {{ transaction.transaction_type }}</strong>?</p>
+
+    <form method="post">
+        {% csrf_token %}
+        <a href="{% url 'transaction_list' %}" class="btn btn-secondary">Cancel</a>
+        <button type="submit" class="btn btn-danger">Delete</button>
+    </form>
+</div>
+{% endblock %}

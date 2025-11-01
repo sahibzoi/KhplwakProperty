@@ -1,0 +1,219 @@
+{% extends 'dealer/base.html' %}
+{% load widget_tweaks %}
+{% block title %}Add Expense | Khplwak Property{% endblock %}
+
+{% block content %}
+
+<style>
+    .form-shell {
+        border-radius: 1rem;
+        background: #ffffff;
+        box-shadow: 0 12px 30px rgba(0,0,0,0.06);
+        border: 1px solid rgba(0,0,0,0.05);
+        overflow: hidden;
+    }
+
+    .form-head {
+        background: linear-gradient(90deg,#065f46 0%,#0f766e 100%);
+        color: #fff;
+        border: none;
+        padding: 1rem 1.25rem;
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        row-gap: .75rem;
+        align-items: flex-start;
+    }
+
+    .form-head-title {
+        font-weight: 600;
+        font-size: 1rem;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        gap: .5rem;
+    }
+
+    .form-head-title i {
+        color: #facc15;
+        font-size: 1.2rem;
+    }
+
+    .form-head-right .btn-back {
+        background: #facc15;
+        color: #000;
+        border: none;
+        border-radius: .6rem;
+        font-weight: 600;
+        font-size: .8rem;
+        padding: .6rem .9rem;
+        line-height: 1rem;
+        display: inline-flex;
+        align-items: center;
+        gap: .4rem;
+        text-decoration: none;
+    }
+    .form-head-right .btn-back:hover {
+        background: #eab308;
+        color: #000;
+        text-decoration: none;
+    }
+
+    .form-body {
+        padding: 1.25rem 1.25rem 0;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: #064e3b;
+        font-size: .9rem;
+    }
+
+    .form-footer {
+        border-top: 1px solid rgba(0,0,0,0.06);
+        background-color: #f9fafb;
+        padding: 1rem 1.25rem;
+        display: flex;
+        justify-content: flex-end;
+        gap: .5rem;
+        border-radius: 0 0 1rem 1rem;
+    }
+
+    .btn-cancel {
+        border-radius: .5rem;
+        font-weight: 500;
+        color: #065f46;
+        border: 1px solid #065f46;
+        background: transparent;
+        padding: .6rem 1rem;
+        font-size: .85rem;
+    }
+    .btn-cancel:hover {
+        background-color: #065f46;
+        color: #fff;
+    }
+
+    .btn-save {
+        background: linear-gradient(90deg,#065f46 0%,#0f766e 100%);
+        border: none;
+        border-radius: .5rem;
+        font-weight: 600;
+        color: #fff;
+        padding: .6rem 1rem;
+        font-size: .85rem;
+    }
+
+    .invalid-feedback {
+        display: block;
+        font-size: .8rem;
+    }
+</style>
+
+<div class="form-shell">
+
+    <!-- HEADER -->
+    <div class="form-head">
+        <div class="form-head-title">
+            <i class="bi bi-cash-stack"></i>
+            {% if form.instance.id %}
+                Edit Expense
+            {% else %}
+                Add Expense
+            {% endif %}
+        </div>
+
+        <div class="form-head-right">
+            <a href="{% url 'expense_list' %}" class="btn-back">
+                <i class="bi bi-arrow-left"></i> Back to Expenses
+            </a>
+        </div>
+    </div>
+
+    <!-- FORM -->
+    <form method="post" novalidate>
+        {% csrf_token %}
+        <div class="form-body">
+            <div class="row">
+
+                <!-- DATE -->
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Date</label>
+                    {% if form.date.errors %}
+                        {% render_field form.date class="form-control is-invalid" %}
+                        <div class="invalid-feedback">{{ form.date.errors.0 }}</div>
+                    {% else %}
+                        {% render_field form.date class="form-control" %}
+                    {% endif %}
+                </div>
+
+                <!-- CATEGORY -->
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Category</label>
+                    {% if form.category.errors %}
+                        {% render_field form.category class="form-select is-invalid" %}
+                        <div class="invalid-feedback">{{ form.category.errors.0 }}</div>
+                    {% else %}
+                        {% render_field form.category class="form-select" %}
+                    {% endif %}
+                </div>
+
+                <!-- AMOUNT -->
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Amount (؋ AFN)</label>
+                    {% if form.amount.errors %}
+                        {% render_field form.amount class="form-control is-invalid" placeholder="e.g. 25000" %}
+                        <div class="invalid-feedback">{{ form.amount.errors.0 }}</div>
+                    {% else %}
+                        {% render_field form.amount class="form-control" placeholder="e.g. 25000" %}
+                    {% endif %}
+                </div>
+
+                <!-- PROPERTY -->
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Property (optional)</label>
+                    {% if form.property_item.errors %}
+                        {% render_field form.property_item class="form-select is-invalid" %}
+                        <div class="invalid-feedback">{{ form.property_item.errors.0 }}</div>
+                    {% else %}
+                        {% render_field form.property_item class="form-select" %}
+                    {% endif %}
+                </div>
+
+                <!-- DESCRIPTION -->
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Description</label>
+                    {% if form.description.errors %}
+                        {% render_field form.description class="form-control is-invalid" placeholder="e.g. Cement, tiles, electrician labor" %}
+                        <div class="invalid-feedback">{{ form.description.errors.0 }}</div>
+                    {% else %}
+                        {% render_field form.description class="form-control" placeholder="e.g. Cement, tiles, electrician labor" %}
+                    {% endif %}
+                </div>
+
+                <!-- REMARKS -->
+                <div class="col-md-12 mb-3">
+                    <label class="form-label">Remarks</label>
+                    {% if form.remarks.errors %}
+                        {% render_field form.remarks class="form-control is-invalid" rows="2" placeholder="Internal notes (not shown to clients)" %}
+                        <div class="invalid-feedback">{{ form.remarks.errors.0 }}</div>
+                    {% else %}
+                        {% render_field form.remarks class="form-control" rows="2" placeholder="Internal notes (not shown to clients)" %}
+                    {% endif %}
+                </div>
+
+            </div>
+        </div>
+
+        <!-- FOOTER -->
+        <div class="form-footer">
+            <a href="{% url 'expense_list' %}" class="btn-cancel">
+                <i class="bi bi-x-circle me-1"></i> Cancel
+            </a>
+            <button type="submit" class="btn-save">
+                <i class="bi bi-save me-1"></i> Save Expense
+            </button>
+        </div>
+    </form>
+</div>
+
+{% endblock %}

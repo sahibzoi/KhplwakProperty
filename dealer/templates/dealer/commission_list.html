@@ -1,0 +1,194 @@
+{% extends 'dealer/base.html' %}
+{% load currency_filters %}
+{% block content %}
+
+<style>
+/* ======= STRUCTURE ======= */
+.list-shell {
+    border-radius: 1rem;
+    background: #ffffff;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.06);
+    border: 1px solid rgba(0,0,0,0.05);
+    overflow: hidden;
+}
+
+/* ======= HEADER ======= */
+.list-head {
+    background: linear-gradient(90deg,#065f46 0%,#0f766e 100%);
+    color: #fff;
+    padding: 1rem 1.25rem;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    row-gap: 1rem;
+    align-items: flex-start;
+}
+
+.list-head-left { display: flex; flex-direction: column; gap: .25rem; }
+.list-head-title {
+    font-weight: 600; font-size: 1rem; color: #fff;
+    display: flex; align-items: center; gap: .5rem;
+}
+.list-head-title i { color: #facc15; font-size: 1.3rem; }
+.list-head-sub { font-size: .8rem; color: rgba(255,255,255,.8); line-height: 1.2rem; }
+
+/* ======= RIGHT HEADER ACTIONS ======= */
+.list-head-right { display: flex; flex-wrap: wrap; align-items: flex-start; gap: .75rem; }
+.total-box {
+    background-color: #fefce8; border: 1px solid #eab30855;
+    border-radius: .75rem; padding: .6rem .8rem;
+    min-width: 180px; line-height: 1.2rem;
+}
+.total-box-label {
+    font-size: .7rem; font-weight: 600; color: #92400e;
+    letter-spacing: .03em; text-transform: uppercase;
+}
+.total-box-value { font-size: 1rem; font-weight: 600; color: #92400e; }
+
+.btn-add, .btn-back {
+    border: none; border-radius: .6rem; font-weight: 600; font-size: .8rem;
+    padding: .6rem .9rem; line-height: 1rem;
+    display: inline-flex; align-items: center; gap: .4rem; text-decoration: none;
+}
+.btn-add { background: #facc15; color: #000; }
+.btn-add:hover { background: #eab308; }
+.btn-back { background: #0f766e; color: #fff; }
+.btn-back:hover { background: #065f46; }
+
+/* ======= TABLE ======= */
+.list-body { padding: 1rem 1.25rem 1.25rem; }
+.table thead th {
+    background-color: #fefce8; color: #064e3b; font-weight: 600;
+    border-bottom: 2px solid #eab308; font-size: .8rem; white-space: nowrap;
+}
+.table tbody td { font-size: .85rem; vertical-align: middle; }
+.table tbody tr:hover { background-color: #f9fafb; }
+.fw-semibold { font-weight: 600; color: #111827; }
+.sub-text { font-size: .75rem; color: #6b7280; }
+.money { font-weight: 600; color: #065f46; font-size: .9rem; white-space: nowrap; }
+
+/* DEAL TYPE */
+.badge-dealtype {
+    font-size: .7rem; font-weight: 600; padding: .35rem .5rem;
+    border-radius: .5rem;
+}
+.badge-sale { background-color: #dcfce7; color: #065f46; }
+.badge-rent { background-color: #e0f2fe; color: #075985; }
+.badge-mortgage { background-color: #fef3c7; color: #92400e; }
+
+/* ACTIONS */
+.btn-table-sm {
+    font-size: .75rem; line-height: 1rem; font-weight: 600; border-radius: .5rem;
+    padding: .35rem .6rem; display: inline-flex; align-items: center;
+    gap: .35rem; text-decoration: none;
+}
+.btn-edit { background: #eff6ff; color: #1e40af; border: 1px solid #1e40af; }
+.btn-edit:hover { background: #1e40af; color: #fff; }
+.btn-delete { background: #fef2f2; color: #991b1b; border: 1px solid #991b1b; }
+.btn-delete:hover { background: #991b1b; color: #fff; }
+
+/* MODAL */
+.modal-header.gradient-header { background: linear-gradient(90deg,#065f46,#0f766e); color: #fff; }
+.modal-header .bi-exclamation-triangle { color:#facc15; }
+.btn-close-white { filter: invert(1); }
+</style>
+
+<div class="list-shell mb-4">
+
+    <!-- HEADER -->
+    <div class="list-head">
+        <div class="list-head-left">
+            <div class="list-head-title">
+                <i class="bi bi-cash-coin"></i>
+                <span>Commissions</span>
+            </div>
+            <div class="list-head-sub">Commission earned by dealer on closed deals.</div>
+        </div>
+
+        <div class="list-head-right">
+            <div class="total-box">
+                <div class="total-box-label">Total Earned</div>
+                <div class="total-box-value">{{ total_commission|afn }}</div>
+            </div>
+
+            <a href="{% url 'dashboard' %}" class="btn-back">
+                <i class="bi bi-arrow-left-circle"></i> Back
+            </a>
+
+            <a href="{% url 'commission_create' %}" class="btn-add">
+                <i class="bi bi-plus-circle"></i> Add Commission
+            </a>
+        </div>
+    </div>
+
+    <!-- BODY -->
+    <div class="list-body">
+        <div class="table-responsive">
+            <table class="table align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>Property</th>
+                        <th>Deal Type</th>
+                        <th class="text-end">Deal Amount (AFN)</th>
+                        <th>Commission Rule</th>
+                        <th class="text-end">Earned (AFN)</th>
+                        <th>Date</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for c in commissions %}
+                    <tr>
+                        <td>
+                            <div class="fw-semibold">{{ c.property_item.address }}</div>
+                            <div class="sub-text">{{ c.property_item.city }}{% if c.property_item.area_name %}, {{ c.property_item.area_name }}{% endif %}</div>
+                        </td>
+                        <td>
+                            {% if c.deal_type == 'sale' %}
+                                <span class="badge-dealtype badge-sale">Sale</span>
+                            {% elif c.deal_type == 'rent' %}
+                                <span class="badge-dealtype badge-rent">Rent</span>
+                            {% elif c.deal_type == 'mortgage' %}
+                                <span class="badge-dealtype badge-mortgage">Mortgage</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-end"><div class="money">{{ c.deal_amount|afn }}</div></td>
+                        <td>
+                            {% if c.commission_type == 'percent' %}
+                                <div class="fw-semibold">{{ c.commission_value }}%</div>
+                                <div class="sub-text">of deal</div>
+                            {% else %}
+                                <div class="fw-semibold">{{ c.commission_value|afn }}</div>
+                                <div class="sub-text">fixed</div>
+                            {% endif %}
+                        </td>
+                        <td class="text-end"><div class="money">{{ c.total_earned|afn }}</div></td>
+                        <td>
+                            <div class="fw-semibold">{{ c.created_at|date:"Y-m-d" }}</div>
+                            <div class="sub-text">{{ c.created_at|time:"H:i" }}</div>
+                        </td>
+                        <td class="text-end">
+                            <a href="{% url 'commission_edit' c.id %}" class="btn-table-sm btn-edit">
+                                <i class="bi bi-pencil-square"></i> Edit
+                            </a>
+                            <form action="{% url 'commission_delete' c.id %}" method="post" style="display:inline;">
+                                {% csrf_token %}
+                                <button class="btn-table-sm btn-delete"><i class="bi bi-trash"></i> Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center text-muted py-4">
+                            <i class="bi bi-exclamation-circle"></i> No commissions recorded.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
