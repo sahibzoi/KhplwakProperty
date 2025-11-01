@@ -3,23 +3,11 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# ── Core security/debug ─────────────────────────────────────────────────────────
-# Read SECRET_KEY from env in production; fallback only for local dev
-SECRET_KEY = os.environ.get(
-    "SECRET_KEY",
-    "dev-insecure-key-only-for-local"
-)
-
-# DEBUG off by default on Render; turn on locally if you like
+SECRET_KEY = os.environ.get("SECRET_KEY", "dev-insecure-key-only-for-local")
 DEBUG = os.environ.get("DEBUG", "False").lower() == "true"
 
-ALLOWED_HOSTS = [
-    "127.0.0.1",
-    "localhost",
-    ".onrender.com",  # Render preview/live hosts
-]
+ALLOWED_HOSTS = ["127.0.0.1", "localhost", ".onrender.com"]
 
-# ── Apps ────────────────────────────────────────────────────────────────────────
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
@@ -32,20 +20,15 @@ INSTALLED_APPS = [
     "accounts",
 ]
 
-# ── Middleware ──────────────────────────────────────────────────────────────────
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
-    # WhiteNoise must be right after SecurityMiddleware
     "whitenoise.middleware.WhiteNoiseMiddleware",
-
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-
-    # your custom middleware (now in dealer/middleware.py)
     "dealer.middleware.NoCacheForAuthenticatedPages",
 ]
 
@@ -72,7 +55,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "KhplwakProperty.wsgi.application"
 
-# ── DB ──────────────────────────────────────────────────────────────────────────
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
@@ -80,7 +62,6 @@ DATABASES = {
     }
 }
 
-# ── Auth validators ─────────────────────────────────────────────────────────────
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
     {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
@@ -93,16 +74,13 @@ TIME_ZONE = "UTC"
 USE_I18N = True
 USE_TZ = True
 
-# ── Static & media ──────────────────────────────────────────────────────────────
+# Static / Media
 STATIC_URL = "/static/"
-STATIC_ROOT = BASE_DIR / "staticfiles"         # collectstatic target
-
-# If you have app-level static folders (e.g., dealer/static), keep this:
+STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_DIRS = [
-    BASE_DIR / "dealer" / "static",
+    BASE_DIR / "static",            # project-level static (css/, js/, images/)
+    BASE_DIR / "dealer" / "static", # app static
 ]
-
-# Enable compressed+hashed static files for WhiteNoise
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 MEDIA_URL = "/media/"
@@ -110,19 +88,17 @@ MEDIA_ROOT = BASE_DIR / "media"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-# Auth redirects
 LOGIN_REDIRECT_URL = "home"
 LOGOUT_REDIRECT_URL = "home"
 LOGIN_URL = "login"
 
-# CSRF trusted origins (add your custom domain if any)
 CSRF_TRUSTED_ORIGINS = [
     "http://127.0.0.1:8000",
     "http://localhost:8000",
-    # e.g. "https://your-custom-domain.com",
+    "https://khplwakproperty-1.onrender.com",
+    "https://*.onrender.com",
 ]
 
-# ── Production-only security (don’t break local HTTP) ───────────────────────────
 if not DEBUG:
     SECURE_SSL_REDIRECT = True
     SESSION_COOKIE_SECURE = True
