@@ -7,7 +7,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # ── Security / Debug
 SECRET_KEY = os.environ.get("SECRET_KEY", "dev-insecure-key-only-for-local")
 DEBUG = os.environ.get("DEBUG", "True").lower() == "true"  # True for local, set False on Render
-
 ALLOWED_HOSTS = ["127.0.0.1", "localhost", ".onrender.com"]
 
 # ── Apps
@@ -26,17 +25,13 @@ INSTALLED_APPS = [
 # ── Middleware
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
-    # WhiteNoise right after SecurityMiddleware
     "whitenoise.middleware.WhiteNoiseMiddleware",
-
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-
-    # custom (defined in dealer/middleware.py)
     "dealer.middleware.NoCacheForAuthenticatedPages",
 ]
 
@@ -63,7 +58,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "KhplwakProperty.wsgi.application"
 
-# ── Database (SQLite for now)
+# ── Database (SQLite)
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
@@ -71,7 +66,7 @@ DATABASES = {
     }
 }
 
-# ── Auth validators
+# ── Password validation
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
     {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
@@ -79,6 +74,7 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
 
+# ── Localization
 LANGUAGE_CODE = "en-us"
 TIME_ZONE = "UTC"
 USE_I18N = True
@@ -86,15 +82,13 @@ USE_TZ = True
 
 # ── Static & Media
 STATIC_URL = "/static/"
-STATIC_ROOT = BASE_DIR / "staticfiles"  # collectstatic target
+STATIC_ROOT = BASE_DIR / "staticfiles"
 
-# Optional project-level static (keep if you have /static)
 STATICFILES_DIRS = [
-    BASE_DIR / "static",            # OK if this folder exists; remove if you don't use it
-    BASE_DIR / "dealer" / "static", # app static
+    BASE_DIR / "static",
+    BASE_DIR / "dealer" / "static",
 ]
 
-# WhiteNoise hashed + compressed files
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 MEDIA_URL = "/media/"
@@ -102,7 +96,7 @@ MEDIA_ROOT = BASE_DIR / "media"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-# ── Auth redirects
+# ── Authentication
 LOGIN_REDIRECT_URL = "home"
 LOGOUT_REDIRECT_URL = "home"
 LOGIN_URL = "login"
