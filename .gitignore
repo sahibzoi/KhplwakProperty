@@ -1,27 +1,21 @@
-# Python cache
+# Python
 __pycache__/
 *.py[cod]
+*.env
+.env
 
-# Django database
-*.sqlite3
-
-# Static & media folders
-/staticfiles/
-/media/
-
-# Environments
+# Virtual envs
 venv/
-.venv/
-ENV/
+.env*/
 
-# Logs
-*.log
+# Django
+db.sqlite3
+media/
 
-# IDE and OS files
+# Static build output (never commit)
+staticfiles/
+
+# OS / Editor
 .DS_Store
 Thumbs.db
 .vscode/
-.idea/
-
-# Secret files
-.env
